@@ -12,7 +12,17 @@
               v-for="header in headerGroup.headers"
               :key="header.id"
               class="gf-table__head-cell"
+              :class="{
+                'gf-table__head-cell--draggable': canReorder(header),
+                'gf-table__head-cell--dragging': isDragging(header),
+                'gf-table__head-cell--drop-target': isDropTarget(header),
+              }"
               :style="getHeaderStyle(header)"
+              :draggable="canReorder(header)"
+              @dragstart="onHeaderDragStart(header, $event)"
+              @dragover.prevent="onHeaderDragOver(header, $event)"
+              @drop.prevent="onHeaderDrop(header, $event)"
+              @dragend="onHeaderDragEnd"
             >
               <div class="gf-table__head-cell__content">
                 <span v-if="!header.isPlaceholder">
@@ -92,6 +102,8 @@ export default Vue.extend({
   data() {
     return {
       table: null as GridforgeTableInstance | null,
+      draggedColumnId: null as string | null,
+      dragOverColumnId: null as string | null,
     };
   },
   computed: {
@@ -196,6 +208,77 @@ export default Vue.extend({
       if (handler) {
         handler(event);
       }
+    },
+    canReorder(header: Header<TableRow, unknown>): boolean {
+      // Не пытаемся перетаскивать плейсхолдеры и групповые заголовки без колонки
+      return Boolean(header.column && !header.isPlaceholder);
+    },
+    onHeaderDragStart(header: Header<TableRow, unknown>, event: DragEvent) {
+      if (!this.canReorder(header)) return;
+      this.draggedColumnId = header.column.id as string;
+      this.dragOverColumnId = null;
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', String(this.draggedColumnId));
+      }
+    },
+    onHeaderDragOver(header: Header<TableRow, unknown>, event: DragEvent) {
+      // Просто разрешаем drop — логика перестановки в onHeaderDrop
+      if (!this.canReorder(header)) return;
+      this.dragOverColumnId = header.column.id as string;
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
+    },
+    onHeaderDrop(header: Header<TableRow, unknown>, event: DragEvent) {
+      if (!this.table || !this.draggedColumnId || !this.canReorder(header)) return;
+      const targetId = header.column.id as string;
+      const sourceId = this.draggedColumnId;
+      if (sourceId === targetId) {
+        this.draggedColumnId = null;
+        this.dragOverColumnId = null;
+        return;
+      }
+
+      const currentOrder =
+        this.table.getState().columnOrder && this.table.getState().columnOrder.length
+          ? [...this.table.getState().columnOrder]
+          : this.table.getAllLeafColumns().map((col) => col.id as string);
+
+      const fromIndex = currentOrder.indexOf(sourceId);
+      const toIndex = currentOrder.indexOf(targetId);
+      if (fromIndex === -1 || toIndex === -1) {
+        this.draggedColumnId = null;
+        return;
+      }
+
+      currentOrder.splice(fromIndex, 1);
+      currentOrder.splice(toIndex, 0, sourceId);
+
+      this.table.setColumnOrder(currentOrder);
+      this.draggedColumnId = null;
+      // Форсируем перерисовку, чтобы заголовки/ячейки перешли в новый порядок
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+    },
+    onHeaderDragEnd() {
+      // На случай, если drag завершился вне заголовков
+      this.dragOverColumnId = null;
+      this.draggedColumnId = null;
+    },
+    isDragging(header: Header<TableRow, unknown>): boolean {
+      return Boolean(
+        this.draggedColumnId && header.column && this.draggedColumnId === header.column.id,
+      );
+    },
+    isDropTarget(header: Header<TableRow, unknown>): boolean {
+      return Boolean(
+        this.dragOverColumnId &&
+        header.column &&
+        this.dragOverColumnId === header.column.id &&
+        this.draggedColumnId !== this.dragOverColumnId,
+      );
     },
     isResizing(header: Header<TableRow, unknown>) {
       if (!this.table) return false;
