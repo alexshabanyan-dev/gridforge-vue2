@@ -1,5 +1,40 @@
 <template>
   <div :class="['gf-table', customClass]">
+    <div class="gf-table__toolbar">
+      <div class="gf-table__toolbar-spacer" />
+      <div class="gf-table__column-menu" v-if="table">
+        <button
+          ref="columnMenuButton"
+          type="button"
+          class="gf-table__column-menu-trigger"
+          @click="toggleColumnMenu"
+        >
+          <!-- Простая иконка-шестерёнка -->
+          <span class="gf-table__column-menu-trigger-icon">⚙️</span>
+        </button>
+      </div>
+    </div>
+    <div v-if="isColumnMenuOpen" class="gf-table__column-menu-portal">
+      <div class="gf-table__column-menu-backdrop" @click="toggleColumnMenu" />
+      <div class="gf-table__column-menu-dropdown" :style="columnMenuDropdownStyle">
+        <div class="gf-table__column-menu-header">
+          <span class="gf-table__column-menu-header-title">Колонки</span>
+        </div>
+        <div class="gf-table__column-menu-content">
+          <label v-for="column in leafColumns" :key="column.id" class="gf-table__column-menu-item">
+            <input
+              type="checkbox"
+              class="gf-table__column-menu-checkbox"
+              :checked="column.getIsVisible()"
+              @change="onToggleColumnVisibility(column, $event)"
+            />
+            <span class="gf-table__column-menu-item-label">
+              {{ column.columnDef.header || column.id }}
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
     <div class="gf-table__wrapper">
       <table :class="tableClass">
         <thead v-if="table" class="gf-table__head">
@@ -104,6 +139,8 @@ export default Vue.extend({
       table: null as GridforgeTableInstance | null,
       draggedColumnId: null as string | null,
       dragOverColumnId: null as string | null,
+      isColumnMenuOpen: false,
+      columnMenuPosition: null as { top: number; right: number } | null,
     };
   },
   computed: {
@@ -117,6 +154,20 @@ export default Vue.extend({
     visibleColumnCount(): number {
       if (!this.table) return 0;
       return this.table.getVisibleLeafColumns().length;
+    },
+    leafColumns(): any[] {
+      if (!this.table) return [];
+      return this.table.getAllLeafColumns();
+    },
+    columnMenuDropdownStyle(): Record<string, string> {
+      if (!this.isColumnMenuOpen || !this.columnMenuPosition) {
+        return {};
+      }
+      return {
+        position: 'fixed',
+        top: `${this.columnMenuPosition.top}px`,
+        right: `${this.columnMenuPosition.right}px`,
+      };
     },
   },
   watch: {
@@ -148,6 +199,35 @@ export default Vue.extend({
   methods: {
     buildTable() {
       this.table = createTanstackTable(this.data || [], this.columns || []);
+    },
+    toggleColumnMenu() {
+      const next = !this.isColumnMenuOpen;
+      this.isColumnMenuOpen = next;
+      if (next) {
+        const btn = this.$refs.columnMenuButton as HTMLElement | undefined;
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          this.columnMenuPosition = {
+            top: rect.bottom + 8,
+            right: window.innerWidth - rect.right - 8,
+          };
+        } else {
+          this.columnMenuPosition = null;
+        }
+      } else {
+        this.columnMenuPosition = null;
+      }
+    },
+    onToggleColumnVisibility(column: any, event: Event) {
+      if (!this.table) return;
+      const target = event.target as HTMLInputElement | null;
+      const isChecked = target ? target.checked : column.getIsVisible();
+      column.toggleVisibility(isChecked);
+      // TanStack сам обновляет state.columnVisibility через features,
+      // но мы форсируем перерисовку Vue для надёжности
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
     },
     getHeaderStyle(header: Header<TableRow, unknown>) {
       if (!this.table || !header.column || typeof header.getSize !== 'function') {
