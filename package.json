@@ -38,7 +38,16 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "vue": "^2.7.8"
+    "vue": "^2.7.8",
+    "floating-vue": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": false
+    },
+    "floating-vue": {
+      "optional": false
+    }
   },
   "devDependencies": {
     "@vitejs/plugin-vue2": "^2.0.3",
@@ -54,6 +63,7 @@
     "vue-tsc": "^2.0.29"
   },
   "dependencies": {
-    "@tanstack/table-core": "^8.20.0"
+    "@tanstack/table-core": "^8.20.0",
+    "floating-vue": "vue2"
   }
 }

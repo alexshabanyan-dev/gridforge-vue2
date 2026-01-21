@@ -1,50 +1,84 @@
 <template>
-  <thead class="gf-table__head">
-    <tr class="gf-table__head-row">
+  <thead v-if="table" class="gf-table__head">
+    <tr
+      v-for="headerGroup in headerGroups"
+      :key="headerGroup.id"
+      class="gf-table__head-row"
+    >
       <TableHeaderCell
-        v-for="column in validColumns"
-        :key="getColumnKey(column)"
-        :column="column"
-        :column-sizing="columnSizing"
+        v-for="header in headerGroup.headers"
+        :key="header.id"
+        :header="header"
+        :layout="layout"
+        :table="table"
+        :visible-column-count="visibleColumnCount"
+        :dragged-column-id="draggedColumnId"
+        :drag-over-column-id="dragOverColumnId"
+        @resize-start="onResizeStart"
+        @drag-start="onDragStart"
+        @drag-over="onDragOver"
+        @drop="onDrop"
+        @drag-end="onDragEnd"
       />
     </tr>
   </thead>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, type Ref } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn } from '../types';
+import type { GridforgeTableInstance } from '../tableCore';
 import TableHeaderCell from './TableHeaderCell.vue';
-import { getColumnKey } from '../utils/columnHelpers';
 
-const defaultColumnSizing = ref<Record<string, number>>({});
-
-export default defineComponent({
+export default Vue.extend({
   name: 'TableHeader',
   components: {
     TableHeaderCell,
   },
   props: {
-    columns: {
-      type: Array as PropType<TableColumn[]>,
+    table: {
+      type: Object as PropType<GridforgeTableInstance | null>,
+      default: null,
+    },
+    layout: {
+      type: String as PropType<'fit' | 'scroll'>,
       required: true,
     },
-    columnSizing: {
-      type: Object as PropType<Ref<Record<string, number>>>,
-      required: false,
-      default: () => defaultColumnSizing,
+    visibleColumnCount: {
+      type: Number,
+      required: true,
+    },
+    draggedColumnId: {
+      type: String,
+      default: null,
+    },
+    dragOverColumnId: {
+      type: String,
+      default: null,
     },
   },
-  setup(props) {
-    const validColumns = computed(() => {
-      return props.columns.filter((col) => col != null);
-    });
-
-    return {
-      getColumnKey,
-      validColumns,
-    };
+  computed: {
+    headerGroups() {
+      if (!this.table) return [];
+      return this.table.getHeaderGroups();
+    },
+  },
+  methods: {
+    onResizeStart(header: any, event: MouseEvent | TouchEvent) {
+      this.$emit('resize-start', header, event);
+    },
+    onDragStart(header: any, event: DragEvent) {
+      this.$emit('drag-start', header, event);
+    },
+    onDragOver(header: any, event: DragEvent) {
+      this.$emit('drag-over', header, event);
+    },
+    onDrop(header: any, event: DragEvent) {
+      this.$emit('drop', header, event);
+    },
+    onDragEnd() {
+      this.$emit('drag-end');
+    },
   },
 });
 </script>

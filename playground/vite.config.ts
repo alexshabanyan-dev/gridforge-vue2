@@ -14,8 +14,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, '../src'),
     },
   },
+  optimizeDeps: {
+    include: ['floating-vue'],
+    esbuildOptions: {
+      target: 'es2015',
+    },
+  },
   server: {
     port: 3000,
     open: true,
+    fs: {
+      // Разрешаем доступ к родительской директории для поиска node_modules
+      allow: ['..'],
+    },
   },
 });

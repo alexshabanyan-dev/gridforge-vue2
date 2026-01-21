@@ -1,78 +1,41 @@
 <template>
   <td class="gf-table__body-cell" :style="cellStyle">
-    {{ cellValue }}
+    {{ cell.getValue() }}
   </td>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, type Ref } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn, TableRow } from '../types';
-import { getColumnKey, getCellValue } from '../utils/columnHelpers';
+import type { Cell } from '@tanstack/table-core';
+import type { TableRow } from '../types';
+import type { GridforgeTableInstance } from '../tableCore';
+import { getCellStyle } from '../utils/columnStyles';
 
-const defaultColumnSizing = ref<Record<string, number>>({});
-
-export default defineComponent({
+export default Vue.extend({
   name: 'TableBodyCell',
   props: {
-    row: {
-      type: Object as PropType<TableRow>,
+    cell: {
+      type: Object as PropType<Cell<TableRow, unknown>>,
       required: true,
     },
-    column: {
-      type: Object as PropType<TableColumn>,
+    layout: {
+      type: String as PropType<'fit' | 'scroll'>,
       required: true,
     },
-    columnSizing: {
-      type: Object as PropType<Ref<Record<string, number>>>,
-      required: false,
-      default: () => defaultColumnSizing,
+    table: {
+      type: Object as PropType<GridforgeTableInstance | null>,
+      default: null,
+    },
+    visibleColumnCount: {
+      type: Number,
+      required: true,
     },
   },
-  setup(props) {
-    // Проверяем, что row и column существуют
-    const isValid = computed(() => {
-      return props.row != null && props.column != null;
-    });
-
-    const cellValue = computed(() => {
-      if (!isValid.value) {
-        return '';
-      }
-      return getCellValue(props.row, props.column);
-    });
-
-    const cellStyle = computed(() => {
-      if (!props.column || !props.row) {
-        return {};
-      }
-
-      const columnKey = getColumnKey(props.column);
-      // Явно обращаемся к .value для правильного отслеживания изменений в Vue 2
-      const sizing = props.columnSizing && props.columnSizing.value ? props.columnSizing.value : {};
-      const width =
-        sizing[columnKey] !== undefined
-          ? sizing[columnKey]
-          : typeof props.column.width === 'number'
-            ? props.column.width
-            : 150;
-
-      const styles: Record<string, string> = {
-        width: `${width}px`,
-        minWidth: `${props.column.minWidth || 50}px`,
-      };
-
-      if (props.column.maxWidth !== undefined) {
-        styles.maxWidth = `${props.column.maxWidth}px`;
-      }
-
-      return styles;
-    });
-
-    return {
-      cellValue,
-      cellStyle,
-    };
+  computed: {
+    cellStyle(): Record<string, string> {
+      return getCellStyle(this.cell, this.table, this.layout, this.visibleColumnCount);
+    },
   },
 });
 </script>

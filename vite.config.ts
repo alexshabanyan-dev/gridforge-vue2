@@ -13,6 +13,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  optimizeDeps: {
+    include: ['floating-vue'],
+    esbuildOptions: {
+      target: 'es2015',
+    },
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
@@ -20,11 +26,12 @@ export default defineConfig({
       fileName: (format) => `gridforge-vue2.${format}.js`,
     },
     rollupOptions: {
-      external: ['vue', '@tanstack/table-core'],
+      external: ['vue', '@tanstack/table-core', 'floating-vue'],
       output: {
         globals: {
           vue: 'Vue',
           '@tanstack/table-core': 'TanStackTableCore',
+          'floating-vue': 'FloatingVue',
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') {

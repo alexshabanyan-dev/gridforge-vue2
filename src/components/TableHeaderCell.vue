@@ -1,66 +1,127 @@
 <template>
   <th
-    ref="cellRef"
+    v-if="header"
     class="gf-table__head-cell"
     :class="{
-      'gf-table__head-cell--resizing': isResizing,
+      'gf-table__head-cell--draggable': canReorder,
+      'gf-table__head-cell--dragging': isDragging,
+      'gf-table__head-cell--drop-target': isDropTarget,
     }"
-    :style="columnStyle"
+    :style="headerStyle"
+    :draggable="canReorder"
+    @dragstart="onDragStart"
+    @dragover.prevent="onDragOver"
+    @drop.prevent="onDrop"
+    @dragend="onDragEnd"
   >
     <div class="gf-table__head-cell__content">
-      {{ columnHeader }}
+      <span v-if="!header.isPlaceholder">
+        {{ header.column.columnDef.header }}
+      </span>
     </div>
     <div
-      v-if="canResize"
+      v-if="header.column.getCanResize && header.column.getCanResize()"
       class="gf-table__head-cell__resizer"
       :class="{ 'gf-table__head-cell__resizer--resizing': isResizing }"
-      @mousedown.prevent="startResize"
-      @touchstart.prevent="startResize"
+      @mousedown.prevent="onResizeStart"
+      @touchstart.prevent="onResizeStart"
     />
   </th>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, type Ref } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn } from '../types';
-import { useColumnResize } from '../composables/useColumnResize';
+import type { Header } from '@tanstack/table-core';
+import type { TableRow } from '../types';
+import type { GridforgeTableInstance } from '../tableCore';
+import { getHeaderStyle } from '../utils/columnStyles';
 
-const defaultColumnSizing = ref<Record<string, number>>({});
-
-export default defineComponent({
+export default Vue.extend({
   name: 'TableHeaderCell',
   props: {
-    column: {
-      type: Object as PropType<TableColumn>,
+    header: {
+      type: Object as PropType<Header<TableRow, unknown>>,
       required: true,
     },
-    columnSizing: {
-      type: Object as PropType<Ref<Record<string, number>>>,
-      required: false,
-      default: () => defaultColumnSizing,
+    layout: {
+      type: String as PropType<'fit' | 'scroll'>,
+      required: true,
+    },
+    table: {
+      type: Object as PropType<GridforgeTableInstance | null>,
+      default: null,
+    },
+    visibleColumnCount: {
+      type: Number,
+      required: true,
+    },
+    draggedColumnId: {
+      type: String,
+      default: null,
+    },
+    dragOverColumnId: {
+      type: String,
+      default: null,
     },
   },
-  setup(props) {
-    const cellRef = ref<HTMLElement>();
-
-    const columnHeader = computed(() => {
-      return props.column && props.column.header ? props.column.header : '';
-    });
-
-    const resizeData = useColumnResize({
-      column: props.column,
-      columnSizing: props.columnSizing,
-    });
-
-    return {
-      cellRef,
-      columnHeader,
-      isResizing: resizeData.isResizing,
-      canResize: resizeData.canResize,
-      columnStyle: resizeData.columnStyle,
-      startResize: resizeData.startResize,
-    };
+  computed: {
+    headerStyle(): Record<string, string> {
+      return getHeaderStyle(
+        this.header,
+        this.table,
+        this.layout,
+        this.visibleColumnCount,
+      );
+    },
+    canReorder(): boolean {
+      return Boolean(this.header.column && !this.header.isPlaceholder);
+    },
+    isDragging(): boolean {
+      return Boolean(
+        this.draggedColumnId &&
+        this.header.column &&
+        this.draggedColumnId === this.header.column.id,
+      );
+    },
+    isDropTarget(): boolean {
+      return Boolean(
+        this.dragOverColumnId &&
+        this.header.column &&
+        this.dragOverColumnId === this.header.column.id &&
+        this.draggedColumnId !== this.dragOverColumnId,
+      );
+    },
+    isResizing(): boolean {
+      if (!this.table) return false;
+      const sizingInfo = this.table.getState().columnSizingInfo;
+      return sizingInfo.isResizingColumn === this.header.column.id;
+    },
+  },
+  methods: {
+    onResizeStart(event: MouseEvent | TouchEvent) {
+      if (!this.header.column.getCanResize || !this.header.column.getCanResize()) return;
+      const handler = this.header.getResizeHandler?.();
+      if (handler) {
+        handler(event);
+      }
+      this.$emit('resize-start', this.header, event);
+    },
+    onDragStart(event: DragEvent) {
+      if (!this.canReorder) return;
+      this.$emit('drag-start', this.header, event);
+    },
+    onDragOver(event: DragEvent) {
+      if (!this.canReorder) return;
+      this.$emit('drag-over', this.header, event);
+    },
+    onDrop(event: DragEvent) {
+      if (!this.canReorder) return;
+      this.$emit('drop', this.header, event);
+    },
+    onDragEnd() {
+      this.$emit('drag-end');
+    },
   },
 });
 </script>

@@ -1,96 +1,25 @@
 <template>
   <div :class="['gf-table', customClass]">
-    <div class="gf-table__toolbar">
-      <div class="gf-table__toolbar-spacer" />
-      <div class="gf-table__column-menu" v-if="table">
-        <button
-          ref="columnMenuButton"
-          type="button"
-          class="gf-table__column-menu-trigger"
-          @click="toggleColumnMenu"
-        >
-          <!-- Простая иконка-шестерёнка -->
-          <span class="gf-table__column-menu-trigger-icon">⚙️</span>
-        </button>
-      </div>
-    </div>
-    <div v-if="isColumnMenuOpen" class="gf-table__column-menu-portal">
-      <div class="gf-table__column-menu-backdrop" @click="toggleColumnMenu" />
-      <div class="gf-table__column-menu-dropdown" :style="columnMenuDropdownStyle">
-        <div class="gf-table__column-menu-header">
-          <span class="gf-table__column-menu-header-title">Колонки</span>
-        </div>
-        <div class="gf-table__column-menu-content">
-          <label v-for="column in leafColumns" :key="column.id" class="gf-table__column-menu-item">
-            <input
-              type="checkbox"
-              class="gf-table__column-menu-checkbox"
-              :checked="column.getIsVisible()"
-              @change="onToggleColumnVisibility(column, $event)"
-            />
-            <span class="gf-table__column-menu-item-label">
-              {{ column.columnDef.header || column.id }}
-            </span>
-          </label>
-        </div>
-      </div>
-    </div>
+    <ColumnMenu
+      :table="table"
+      :columns="leafColumns"
+      @visibility-change="onColumnVisibilityChange"
+    />
     <div class="gf-table__wrapper">
       <table :class="tableClass">
-        <thead v-if="table" class="gf-table__head">
-          <tr
-            v-for="headerGroup in table.getHeaderGroups()"
-            :key="headerGroup.id"
-            class="gf-table__head-row"
-          >
-            <th
-              v-for="header in headerGroup.headers"
-              :key="header.id"
-              class="gf-table__head-cell"
-              :class="{
-                'gf-table__head-cell--draggable': canReorder(header),
-                'gf-table__head-cell--dragging': isDragging(header),
-                'gf-table__head-cell--drop-target': isDropTarget(header),
-              }"
-              :style="getHeaderStyle(header)"
-              :draggable="canReorder(header)"
-              @dragstart="onHeaderDragStart(header, $event)"
-              @dragover.prevent="onHeaderDragOver(header, $event)"
-              @drop.prevent="onHeaderDrop(header, $event)"
-              @dragend="onHeaderDragEnd"
-            >
-              <div class="gf-table__head-cell__content">
-                <span v-if="!header.isPlaceholder">
-                  {{ header.column.columnDef.header }}
-                </span>
-              </div>
-              <div
-                v-if="header.column.getCanResize && header.column.getCanResize()"
-                class="gf-table__head-cell__resizer"
-                :class="{ 'gf-table__head-cell__resizer--resizing': isResizing(header) }"
-                @mousedown.prevent="onResizeStart(header, $event)"
-                @touchstart.prevent="onResizeStart(header, $event)"
-              />
-            </th>
-          </tr>
-        </thead>
-        <tbody v-if="table" class="gf-table__body">
-          <tr v-for="row in table.getRowModel().rows" :key="row.id" class="gf-table__body-row">
-            <td
-              v-for="cell in row.getVisibleCells()"
-              :key="cell.id"
-              class="gf-table__body-cell"
-              :style="getCellStyle(cell)"
-            >
-              {{ cell.getValue() }}
-            </td>
-          </tr>
-          <tr v-if="!table.getRowModel().rows.length">
-            <td :colspan="visibleColumnCount" class="gf-table__body-cell">
-              <div class="gf-table__empty">Нет данных</div>
-            </td>
-          </tr>
-        </tbody>
+        <TableHeader
+          :table="table"
+          :layout="layout"
+          :visible-column-count="visibleColumnCount"
+          :dragged-column-id="draggedColumnId"
+          :drag-over-column-id="dragOverColumnId"
+          @resize-start="onResizeStart"
+          @drag-start="onHeaderDragStart"
+          @drag-over="onHeaderDragOver"
+          @drop="onHeaderDrop"
+          @drag-end="onHeaderDragEnd"
+        />
+        <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
       </table>
     </div>
   </div>
@@ -100,11 +29,21 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { TableColumn, TableRow } from '../types';
-import type { Header, Cell } from '@tanstack/table-core';
+import type { Header } from '@tanstack/table-core';
 import { createTanstackTable, GridforgeTableInstance } from '../tableCore';
+import { measureHeaderWidth } from '../utils/columnMeasure';
+import { createFitModeResizeHandler, getFullColumnSizing } from '../utils/columnResize';
+import ColumnMenu from './ColumnMenu.vue';
+import TableHeader from './TableHeader.vue';
+import TableBody from './TableBody.vue';
 
 export default Vue.extend({
   name: 'GridforgeTable',
+  components: {
+    ColumnMenu,
+    TableHeader,
+    TableBody,
+  },
   props: {
     data: {
       type: Array as PropType<TableRow[]>,
@@ -139,8 +78,7 @@ export default Vue.extend({
       table: null as GridforgeTableInstance | null,
       draggedColumnId: null as string | null,
       dragOverColumnId: null as string | null,
-      isColumnMenuOpen: false,
-      columnMenuPosition: null as { top: number; right: number } | null,
+      previousColumnSizing: {} as Record<string, number>,
     };
   },
   computed: {
@@ -159,16 +97,6 @@ export default Vue.extend({
       if (!this.table) return [];
       return this.table.getAllLeafColumns();
     },
-    columnMenuDropdownStyle(): Record<string, string> {
-      if (!this.isColumnMenuOpen || !this.columnMenuPosition) {
-        return {};
-      }
-      return {
-        position: 'fixed',
-        top: `${this.columnMenuPosition.top}px`,
-        right: `${this.columnMenuPosition.right}px`,
-      };
-    },
   },
   watch: {
     data: {
@@ -180,6 +108,10 @@ export default Vue.extend({
     columns: {
       handler() {
         this.buildTable();
+        // Пересчитываем автоматические minSize после изменения колонок
+        this.$nextTick(() => {
+          this.updateAutoMinSizes();
+        });
       },
       deep: true,
     },
@@ -191,6 +123,10 @@ export default Vue.extend({
     // Слушаем события окончания ресайза, чтобы обновить классы
     document.addEventListener('mouseup', this.handleResizeEnd);
     document.addEventListener('touchend', this.handleResizeEnd);
+    // Измеряем заголовки для автоматического определения minWidth
+    this.$nextTick(() => {
+      this.updateAutoMinSizes();
+    });
   },
   beforeDestroy() {
     document.removeEventListener('mouseup', this.handleResizeEnd);
@@ -199,88 +135,100 @@ export default Vue.extend({
   methods: {
     buildTable() {
       this.table = createTanstackTable(this.data || [], this.columns || []);
+      if (!this.table) return;
+
+      // Сохраняем оригинальный setColumnSizing
+      const originalSetColumnSizing = this.table.setColumnSizing.bind(this.table);
+
+      // Создаём обработчик ресайза с логикой "только две колонки" для fit-режима
+      const fitModeHandler = createFitModeResizeHandler(
+        this.table,
+        this.layout as 'fit' | 'scroll',
+        () => this.previousColumnSizing,
+        (sizing) => {
+          this.previousColumnSizing = sizing;
+        },
+      );
+
+      // Переопределяем setColumnSizing
+      (this.table as any).setColumnSizing = (updater: any) => {
+        fitModeHandler(updater, originalSetColumnSizing);
+      };
+
+      // Инициализируем previousColumnSizing текущими размерами колонок
+      this.previousColumnSizing = getFullColumnSizing(this.table);
     },
-    toggleColumnMenu() {
-      const next = !this.isColumnMenuOpen;
-      this.isColumnMenuOpen = next;
-      if (next) {
-        const btn = this.$refs.columnMenuButton as HTMLElement | undefined;
-        if (btn) {
-          const rect = btn.getBoundingClientRect();
-          this.columnMenuPosition = {
-            top: rect.bottom + 8,
-            right: window.innerWidth - rect.right - 8,
-          };
-        } else {
-          this.columnMenuPosition = null;
+    updateAutoMinSizes() {
+      if (!this.table) return;
+
+      const headerCells = this.$el.querySelectorAll(
+        '.gf-table__head-cell',
+      ) as NodeListOf<HTMLElement>;
+
+      if (headerCells.length === 0) return;
+
+      const allColumns = this.table.getAllLeafColumns();
+      let hasChanges = false;
+      const columnSizing = { ...this.table.getState().columnSizing };
+
+      headerCells.forEach((cell, index) => {
+        if (index >= allColumns.length) return;
+
+        const column = allColumns[index];
+        const columnId = column.id as string;
+
+        // Пропускаем колонки, у которых уже задан minWidth в props
+        const originalColumn = this.columns.find(
+          (col) => String(col.columnKey || col.field) === columnId,
+        );
+        if (originalColumn && typeof originalColumn.minWidth === 'number') {
+          return;
         }
-      } else {
-        this.columnMenuPosition = null;
+
+        // Измеряем ширину содержимого заголовка
+        const content = cell.querySelector('.gf-table__head-cell__content') as HTMLElement;
+        if (!content) return;
+
+        const headerText = (column.columnDef.header as string) || columnId;
+        const autoMinWidth = measureHeaderWidth(
+          headerText,
+          content,
+          column.getCanResize() || false,
+        );
+
+        // Обновляем minSize в columnDef напрямую (это влияет на getSize() и ограничения ресайза)
+        const currentMinSize = (column.columnDef as any).minSize || 0;
+        if (autoMinWidth > currentMinSize) {
+          (column.columnDef as any).minSize = autoMinWidth;
+          hasChanges = true;
+        }
+
+        // Если текущий размер колонки меньше автоматического минимума, увеличиваем его
+        const currentSize = columnSizing[columnId] ?? column.getSize();
+        if (currentSize < autoMinWidth) {
+          columnSizing[columnId] = autoMinWidth;
+          hasChanges = true;
+        }
+      });
+
+      // Применяем обновлённые размеры, если что-то изменилось
+      if (hasChanges && Object.keys(columnSizing).length > 0) {
+        this.table.setColumnSizing(columnSizing);
+        // Обновляем previousColumnSizing для корректной работы логики "только две колонки"
+        this.previousColumnSizing = { ...columnSizing };
       }
     },
-    onToggleColumnVisibility(column: any, event: Event) {
+    onColumnVisibilityChange() {
       if (!this.table) return;
-      const target = event.target as HTMLInputElement | null;
-      const isChecked = target ? target.checked : column.getIsVisible();
-      column.toggleVisibility(isChecked);
       // TanStack сам обновляет state.columnVisibility через features,
       // но мы форсируем перерисовку Vue для надёжности
       this.$nextTick(() => {
         this.$forceUpdate();
       });
     },
-    getHeaderStyle(header: Header<TableRow, unknown>) {
-      if (!this.table || !header.column || typeof header.getSize !== 'function') {
-        return {};
-      }
-      const size = header.getSize();
-      if (!size) return {};
-      // В scroll-режиме используем пиксели и даём таблице быть шире контейнера
-      if (this.layout === 'scroll') {
-        return {
-          width: `${size}px`,
-          minWidth: `${size}px`,
-        };
-      }
-      // В fit-режиме жёстко укладываемся в 100% ширины родителя:
-      // считаем долю колонки от общей ширины и задаём проценты
-      const total = typeof this.table.getTotalSize === 'function' ? this.table.getTotalSize() : 0;
-      const percent =
-        total > 0 && size > 0
-          ? (size / total) * 100
-          : this.visibleColumnCount > 0
-            ? 100 / this.visibleColumnCount
-            : 0;
-      return {
-        width: `${percent}%`,
-        minWidth: '0',
-        maxWidth: `${percent}%`,
-      };
-    },
-    getCellStyle(cell: Cell<TableRow, unknown>) {
-      if (!this.table || !cell.column || typeof cell.column.getSize !== 'function') {
-        return {};
-      }
-      const size = cell.column.getSize();
-      if (!size) return {};
-      if (this.layout === 'scroll') {
-        return {
-          width: `${size}px`,
-          minWidth: `${size}px`,
-        };
-      }
-      const total = typeof this.table.getTotalSize === 'function' ? this.table.getTotalSize() : 0;
-      const percent =
-        total > 0 && size > 0
-          ? (size / total) * 100
-          : this.visibleColumnCount > 0
-            ? 100 / this.visibleColumnCount
-            : 0;
-      return {
-        width: `${percent}%`,
-        minWidth: '0',
-        maxWidth: `${percent}%`,
-      };
+    canReorder(header: Header<TableRow, unknown>): boolean {
+      // Не пытаемся перетаскивать плейсхолдеры и групповые заголовки без колонки
+      return Boolean(header.column && !header.isPlaceholder);
     },
     onResizeStart(header: Header<TableRow, unknown>, event: MouseEvent | TouchEvent) {
       if (!header.column.getCanResize || !header.column.getCanResize()) return;
@@ -288,10 +236,6 @@ export default Vue.extend({
       if (handler) {
         handler(event);
       }
-    },
-    canReorder(header: Header<TableRow, unknown>): boolean {
-      // Не пытаемся перетаскивать плейсхолдеры и групповые заголовки без колонки
-      return Boolean(header.column && !header.isPlaceholder);
     },
     onHeaderDragStart(header: Header<TableRow, unknown>, event: DragEvent) {
       if (!this.canReorder(header)) return;
@@ -305,7 +249,12 @@ export default Vue.extend({
     onHeaderDragOver(header: Header<TableRow, unknown>, event: DragEvent) {
       // Просто разрешаем drop — логика перестановки в onHeaderDrop
       if (!this.canReorder(header)) return;
-      this.dragOverColumnId = header.column.id as string;
+      const newDragOverId = header.column.id as string;
+      if (this.dragOverColumnId !== newDragOverId) {
+        this.dragOverColumnId = newDragOverId;
+        // Форсируем обновление для визуальных индикаторов
+        this.$forceUpdate();
+      }
       if (event.dataTransfer) {
         event.dataTransfer.dropEffect = 'move';
       }
@@ -347,26 +296,11 @@ export default Vue.extend({
       this.dragOverColumnId = null;
       this.draggedColumnId = null;
     },
-    isDragging(header: Header<TableRow, unknown>): boolean {
-      return Boolean(
-        this.draggedColumnId && header.column && this.draggedColumnId === header.column.id,
-      );
-    },
-    isDropTarget(header: Header<TableRow, unknown>): boolean {
-      return Boolean(
-        this.dragOverColumnId &&
-        header.column &&
-        this.dragOverColumnId === header.column.id &&
-        this.draggedColumnId !== this.dragOverColumnId,
-      );
-    },
-    isResizing(header: Header<TableRow, unknown>) {
-      if (!this.table) return false;
-      // Используем состояние ресайза напрямую из TanStack
-      const sizingInfo = this.table.getState().columnSizingInfo;
-      return sizingInfo.isResizingColumn === header.column.id;
-    },
     handleResizeEnd() {
+      // Синхронизируем previousColumnSizing с текущим состоянием после окончания ресайза
+      if (this.table) {
+        this.previousColumnSizing = { ...this.table.getState().columnSizing };
+      }
       // Форсируем обновление компонента после окончания ресайза,
       // чтобы убрать класс --resizing
       this.$nextTick(() => {

@@ -1,66 +1,57 @@
 <template>
-  <tbody class="gf-table__body">
+  <tbody v-if="table" class="gf-table__body">
     <TableBodyRow
-      v-for="(row, rowIndex) in validRows"
-      :key="rowIndex"
+      v-for="row in rows"
+      :key="row.id"
       :row="row"
-      :columns="validColumns"
-      :column-sizing="columnSizing"
+      :layout="layout"
+      :table="table"
+      :visible-column-count="visibleColumnCount"
     />
+    <tr v-if="!rows.length">
+      <td :colspan="visibleColumnCount" class="gf-table__body-cell">
+        <div class="gf-table__empty">{{ EMPTY_DATA_TEXT }}</div>
+      </td>
+    </tr>
   </tbody>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, type Ref } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn, TableRow } from '../types';
+import type { GridforgeTableInstance } from '../tableCore';
+import { EMPTY_DATA_TEXT } from '../constants/tableConstants';
 import TableBodyRow from './TableBodyRow.vue';
 
-const defaultColumnSizing = ref<Record<string, number>>({});
-
-export default defineComponent({
+export default Vue.extend({
   name: 'TableBody',
   components: {
     TableBodyRow,
   },
   props: {
-    rows: {
-      type: Array as PropType<TableRow[]>,
+    table: {
+      type: Object as PropType<GridforgeTableInstance | null>,
+      default: null,
+    },
+    layout: {
+      type: String as PropType<'fit' | 'scroll'>,
       required: true,
     },
-    columns: {
-      type: Array as PropType<TableColumn[]>,
+    visibleColumnCount: {
+      type: Number,
       required: true,
-    },
-    columnSizing: {
-      type: Object as PropType<Ref<Record<string, number>>>,
-      required: false,
-      default: () => defaultColumnSizing,
     },
   },
-  setup(props) {
-    // В Vue 2 computed автоматически разворачивается при передаче как prop
-    // Но нужно убедиться, что данные правильно обработаны
-    const validRows = computed(() => {
-      const rows = props.rows;
-      if (!Array.isArray(rows)) {
-        return [];
-      }
-      return rows.filter((row) => row != null && typeof row === 'object');
-    });
-
-    const validColumns = computed(() => {
-      const cols = props.columns;
-      if (!Array.isArray(cols)) {
-        return [];
-      }
-      return cols.filter((col) => col != null && typeof col === 'object');
-    });
-
+  data() {
     return {
-      validRows,
-      validColumns,
+      EMPTY_DATA_TEXT,
     };
+  },
+  computed: {
+    rows() {
+      if (!this.table) return [];
+      return this.table.getRowModel().rows;
+    },
   },
 });
 </script>

@@ -1,62 +1,51 @@
 <template>
-  <tr v-if="hasValidRow" class="gf-table__body-row">
+  <tr class="gf-table__body-row">
     <TableBodyCell
-      v-for="column in validColumns"
-      :key="getColumnKey(column)"
-      :row="row"
-      :column="column"
-      :column-sizing="columnSizing"
+      v-for="cell in visibleCells"
+      :key="cell.id"
+      :cell="cell"
+      :layout="layout"
+      :table="table"
+      :visible-column-count="visibleColumnCount"
     />
   </tr>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, type Ref } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn, TableRow } from '../types';
+import type { Row } from '@tanstack/table-core';
+import type { TableRow } from '../types';
+import type { GridforgeTableInstance } from '../tableCore';
 import TableBodyCell from './TableBodyCell.vue';
-import { getColumnKey } from '../utils/columnHelpers';
 
-const defaultColumnSizing = ref<Record<string, number>>({});
-
-export default defineComponent({
+export default Vue.extend({
   name: 'TableBodyRow',
   components: {
     TableBodyCell,
   },
   props: {
     row: {
-      type: Object as PropType<TableRow>,
+      type: Object as PropType<Row<TableRow>>,
       required: true,
     },
-    columns: {
-      type: Array as PropType<TableColumn[]>,
+    layout: {
+      type: String as PropType<'fit' | 'scroll'>,
       required: true,
     },
-    columnSizing: {
-      type: Object as PropType<Ref<Record<string, number>>>,
-      required: false,
-      default: () => defaultColumnSizing,
+    table: {
+      type: Object as PropType<GridforgeTableInstance | null>,
+      default: null,
+    },
+    visibleColumnCount: {
+      type: Number,
+      required: true,
     },
   },
-  setup(props) {
-    const validColumns = computed(() => {
-      if (!props.columns || !Array.isArray(props.columns)) {
-        return [];
-      }
-      return props.columns.filter((col) => col != null && typeof col === 'object');
-    });
-
-    const hasValidRow = computed(() => {
-      return props.row != null && typeof props.row === 'object';
-    });
-
-    return {
-      row: props.row,
-      hasValidRow,
-      getColumnKey,
-      validColumns,
-    };
+  computed: {
+    visibleCells() {
+      return this.row.getVisibleCells();
+    },
   },
 });
 </script>
