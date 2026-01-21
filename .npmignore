@@ -1,0 +1,12 @@
+playground
+node_modules
+*.log
+.DS_Store
+.vscode
+.idea
+*.tsbuildinfo
+tsconfig*.json
+vite.config.ts
+.eslintrc.cjs
+.prettierrc
+.gitignore

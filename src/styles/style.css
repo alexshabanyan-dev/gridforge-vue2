@@ -1,0 +1,131 @@
+/* GridForge Table Styles */
+
+.gf-table {
+  width: 100%;
+  overflow: hidden;
+}
+
+.gf-table__wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.gf-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+/* Head styles */
+.gf-table__head {
+  background-color: #f8f9fa;
+}
+
+.gf-table__head-row {
+  border-bottom: 2px solid #dee2e6;
+}
+
+.gf-table__head-cell {
+  position: relative;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.gf-table__head-cell__content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gf-table__head-cell--resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+
+.gf-table__head-cell--resizing * {
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Resizer */
+.gf-table__head-cell__resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 100%;
+  touch-action: none;
+  cursor: col-resize;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+.gf-table__head-cell__resizer::before {
+  position: absolute;
+  top: 20%;
+  right: 4px;
+  display: block;
+  width: 2px;
+  height: 60%;
+  content: '';
+  background-color: rgba(226, 232, 240, 0.5);
+  border-radius: 2px;
+  transition: all 0.15s ease;
+}
+
+.gf-table__head-cell:hover .gf-table__head-cell__resizer {
+  opacity: 1;
+}
+
+.gf-table__head-cell__resizer:hover::before {
+  background-color: #3b82f6;
+  width: 3px;
+  right: 3px;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+}
+
+.gf-table__head-cell__resizer--resizing::before {
+  background-color: #2563eb;
+  width: 3px;
+  right: 3px;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.35);
+}
+
+/* Body styles */
+.gf-table__body-row {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.15s ease;
+}
+
+.gf-table__body-row:hover {
+  background-color: #f8f9fa;
+}
+
+.gf-table__body-cell {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+/* Empty state */
+.gf-table__body:empty::after {
+  content: 'Нет данных';
+  display: block;
+  padding: 40px;
+  text-align: center;
+  color: #6c757d;
+}
