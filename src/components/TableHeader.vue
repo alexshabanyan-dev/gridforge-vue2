@@ -29,6 +29,7 @@ import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { GridforgeTableInstance } from '../tableCore';
 import TableHeaderCell from './TableHeaderCell.vue';
+import { canReorder } from '../utils/columnReorder';
 
 export default Vue.extend({
   name: 'TableHeader',

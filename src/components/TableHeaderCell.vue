@@ -36,6 +36,7 @@ import type { Header } from '@tanstack/table-core';
 import type { TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { getHeaderStyle } from '../utils/columnStyles';
+import { canReorder as checkCanReorder } from '../utils/columnReorder';
 
 export default Vue.extend({
   name: 'TableHeaderCell',
@@ -75,7 +76,7 @@ export default Vue.extend({
       );
     },
     canReorder(): boolean {
-      return Boolean(this.header.column && !this.header.isPlaceholder);
+      return checkCanReorder(this.header);
     },
     isDragging(): boolean {
       return Boolean(

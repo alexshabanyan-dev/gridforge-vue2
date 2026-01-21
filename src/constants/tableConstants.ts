@@ -9,6 +9,3 @@ export const DELTA_THRESHOLD = 0.1; // Порог для определения 
 
 export const EMPTY_DATA_TEXT = 'Нет данных';
 export const COLUMN_MENU_TITLE = 'Колонки';
-export const COLUMN_MENU_ICON = '⚙️';
-
-export const COLUMN_MENU_OFFSET = 8; // Отступ для позиционирования меню колонок

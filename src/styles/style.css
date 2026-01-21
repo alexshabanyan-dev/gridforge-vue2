@@ -1,23 +1,82 @@
-/* GridForge Table Styles */
+/* GridForge Table Styles - Корпоративный дизайн для государственных информационных систем */
+
+/* ==========================================================================
+   Цветовая палитра и переменные
+   ========================================================================== */
+
+:root {
+  /* Основные цвета - нейтральная профессиональная палитра */
+  --gf-color-primary: #1e40af; /* Строгий синий для акцентов */
+  --gf-color-primary-light: #3b82f6;
+  --gf-color-primary-dark: #1e3a8a;
+  --gf-color-primary-hover: #2563eb;
+  
+  /* Фоновые цвета */
+  --gf-bg-base: #ffffff;
+  --gf-bg-header: #f8fafc; /* Светло-серый для заголовков */
+  --gf-bg-hover: #f1f5f9; /* Для hover состояний */
+  --gf-bg-selected: #eff6ff; /* Для выбранных элементов */
+  --gf-bg-disabled: #f8fafc;
+  
+  /* Текстовые цвета */
+  --gf-text-primary: #1e293b; /* Основной текст - темно-серый */
+  --gf-text-secondary: #475569; /* Вторичный текст */
+  --gf-text-tertiary: #64748b; /* Третичный текст */
+  --gf-text-disabled: #cbd5e1;
+  
+  /* Границы */
+  --gf-border-color: #e2e8f0; /* Основной цвет границ */
+  --gf-border-color-strong: #cbd5e1; /* Для разделителей */
+  --gf-border-color-light: #f1f5f9; /* Легкие разделители */
+  
+  /* Тени */
+  --gf-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --gf-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
+  --gf-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  --gf-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  
+  /* Радиусы скругления */
+  --gf-radius-sm: 4px;
+  --gf-radius-md: 6px;
+  --gf-radius-lg: 8px;
+  
+  /* Spacing */
+  --gf-spacing-xs: 4px;
+  --gf-spacing-sm: 8px;
+  --gf-spacing-md: 12px;
+  --gf-spacing-lg: 16px;
+  --gf-spacing-xl: 24px;
+}
+
+/* ==========================================================================
+   Базовая структура таблицы
+   ========================================================================== */
 
 .gf-table {
   width: 100%;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Простая верхняя панель над таблицей */
+/* Toolbar */
 .gf-table__toolbar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 8px 0;
-  gap: 8px;
+  padding: var(--gf-spacing-md) 0;
+  gap: var(--gf-spacing-sm);
+  border-bottom: 1px solid var(--gf-border-color);
+  background-color: var(--gf-bg-base);
 }
 
 .gf-table__toolbar-spacer {
   flex: 1;
 }
 
+/* Column menu */
 .gf-table__column-menu {
   position: relative;
   display: inline-block;
@@ -29,123 +88,118 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
-  background-color: #ffffff;
-  color: #495057;
+  border-radius: var(--gf-radius-md);
+  border: 1px solid var(--gf-border-color);
+  background-color: var(--gf-bg-base);
+  color: var(--gf-text-secondary);
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.1s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gf-table__column-menu-trigger:hover {
-  background-color: #f1f3f5;
-  border-color: #0d6efd;
-  color: #0d6efd;
-  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
-  transform: translateY(-1px);
+  background-color: var(--gf-bg-hover);
+  border-color: var(--gf-color-primary);
+  color: var(--gf-color-primary);
+  box-shadow: var(--gf-shadow-sm);
+}
+
+.gf-table__column-menu-trigger:focus {
+  outline: 2px solid var(--gf-color-primary);
+  outline-offset: 2px;
 }
 
 .gf-table__column-menu-trigger:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
+  box-shadow: none;
 }
 
 .gf-table__column-menu-trigger-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   color: inherit;
 }
 
 .gf-table__column-menu-dropdown {
-  min-width: 220px;
-  max-height: 260px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(148, 163, 184, 0.25);
+  min-width: 240px;
+  max-height: 320px;
+  background-color: var(--gf-bg-base);
+  border-radius: var(--gf-radius-lg);
+  border: 1px solid var(--gf-border-color-strong);
+  box-shadow: var(--gf-shadow-xl);
   overflow: hidden;
   z-index: 1001;
   display: flex;
   flex-direction: column;
 }
 
-/* Floating Vue управляет порталом и backdrop автоматически */
-
 .gf-table__column-menu-header {
-  padding: 10px 12px;
-  border-bottom: 1px solid #edf1f5;
-  background-color: #f8fafc;
+  padding: var(--gf-spacing-md) var(--gf-spacing-lg);
+  border-bottom: 1px solid var(--gf-border-color);
+  background-color: var(--gf-bg-header);
 }
 
 .gf-table__column-menu-header-title {
   font-size: 13px;
   font-weight: 600;
-  color: #212529;
+  letter-spacing: 0.01em;
+  color: var(--gf-text-primary);
+  text-transform: uppercase;
 }
 
 .gf-table__column-menu-content {
-  max-height: 220px;
+  max-height: 280px;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: var(--gf-spacing-xs) 0;
 }
 
 .gf-table__column-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: var(--gf-spacing-md);
+  padding: var(--gf-spacing-md) var(--gf-spacing-lg);
   cursor: pointer;
-  transition:
-    background-color 0.12s ease,
-    transform 0.12s ease;
+  transition: background-color 0.15s ease;
 }
 
 .gf-table__column-menu-item:hover {
-  background-color: #f1f3f5;
-  transform: translateX(2px);
+  background-color: var(--gf-bg-hover);
 }
 
 .gf-table__column-menu-checkbox {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin: 0;
   padding: 0;
-  border-radius: 4px;
-  border: 2px solid #ced4da;
-  background-color: #ffffff;
+  border-radius: var(--gf-radius-sm);
+  border: 2px solid var(--gf-border-color-strong);
+  background-color: var(--gf-bg-base);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   display: inline-block;
   position: relative;
-  transition:
-    background-color 0.12s ease,
-    border-color 0.12s ease,
-    box-shadow 0.12s ease,
-    transform 0.1s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .gf-table__column-menu-checkbox:hover {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
-  box-shadow: 0 2px 10px rgba(13, 110, 253, 0.25);
-  transform: scale(1.05);
+  border-color: var(--gf-color-primary);
+  background-color: var(--gf-bg-selected);
+}
+
+.gf-table__column-menu-checkbox:focus {
+  outline: 2px solid var(--gf-color-primary);
+  outline-offset: 2px;
 }
 
 .gf-table__column-menu-checkbox:checked {
-  border-color: #0d6efd;
-  background-color: #0d6efd;
-  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+  border-color: var(--gf-color-primary);
+  background-color: var(--gf-color-primary);
 }
 
 .gf-table__column-menu-checkbox::after {
@@ -153,15 +207,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 4px;
-  height: 8px;
+  width: 5px;
+  height: 9px;
   border: solid #ffffff;
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg) scale(0);
   opacity: 0;
-  transition:
-    opacity 0.12s ease,
-    transform 0.12s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gf-table__column-menu-checkbox:checked::after {
@@ -170,17 +222,26 @@
 }
 
 .gf-table__column-menu-item-label {
-  font-size: 13px;
-  color: #212529;
+  font-size: 14px;
+  color: var(--gf-text-primary);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  font-weight: 400;
 }
+
+/* ==========================================================================
+   Wrapper и таблица
+   ========================================================================== */
 
 .gf-table__wrapper {
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
+  border: 1px solid var(--gf-border-color);
+  border-radius: var(--gf-radius-md);
+  background-color: var(--gf-bg-base);
+  box-shadow: var(--gf-shadow-sm);
 }
 
 .gf-table__table {
@@ -188,41 +249,66 @@
   border-collapse: collapse;
   border-spacing: 0;
   table-layout: fixed;
+  background-color: var(--gf-bg-base);
 }
 
-/* В scroll-режиме даём таблице возможность быть шире контейнера */
 .gf-table__table--scroll {
-  /* В scroll-режиме используем auto layout для учёта ширин колонок */
   table-layout: auto;
 }
 
-/* Head styles */
+/* ==========================================================================
+   Заголовки таблицы
+   ========================================================================== */
+
 .gf-table__head {
-  background-color: #f8f9fa;
+  background-color: var(--gf-bg-header);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .gf-table__head-row {
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--gf-border-color-strong);
 }
 
 .gf-table__head-cell {
   position: relative;
-  padding: 12px 16px;
+  padding: var(--gf-spacing-lg) var(--gf-spacing-xl);
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
-  color: #212529;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--gf-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
-  /* лёгкий вертикальный разделитель между колонками */
-  border-right: 1px solid #edf1f5;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  border-right: 1px solid var(--gf-border-color-light);
+  background-color: var(--gf-bg-header);
+  transition: background-color 0.15s ease;
 }
 
-/* drag & drop reorder */
+.gf-table__head-row .gf-table__head-cell:last-child {
+  border-right: none;
+}
+
+.gf-table__head-cell:hover {
+  background-color: var(--gf-bg-hover);
+}
+
+.gf-table__head-cell__content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+/* Drag & Drop для перестановки колонок */
 .gf-table__head-cell--draggable {
   cursor: grab;
+  user-select: none;
 }
 
 .gf-table__head-cell--draggable:active {
@@ -230,108 +316,137 @@
 }
 
 .gf-table__head-cell--draggable::before {
-  /* маленький "грип" слева, как в продвинутых грид‑таблицах */
   content: '';
   position: absolute;
-  left: 6px;
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 6px;
-  height: 12px;
-  border-radius: 4px;
-  background:
-    radial-gradient(circle, #cbd5e1 40%, transparent 41%) 0 0 / 4px 4px repeat-y,
-    radial-gradient(circle, #cbd5e1 40%, transparent 41%) 3px 0 / 4px 4px repeat-y;
-  opacity: 0.4;
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--gf-text-tertiary) 0%,
+    var(--gf-text-tertiary) 20%,
+    transparent 20%,
+    transparent 40%,
+    var(--gf-text-tertiary) 40%,
+    var(--gf-text-tertiary) 60%,
+    transparent 60%,
+    transparent 80%,
+    var(--gf-text-tertiary) 80%,
+    var(--gf-text-tertiary) 100%
+  );
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
 .gf-table__head-cell--draggable:hover::before {
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 .gf-table__head-cell--dragging {
-  background-color: #e7f1ff;
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.45), 0 2px 6px rgba(15, 23, 42, 0.15);
+  background-color: var(--gf-bg-selected) !important;
+  box-shadow: inset 0 0 0 2px var(--gf-color-primary-light);
+  z-index: 20;
 }
 
 .gf-table__head-cell--dragging::before {
   opacity: 1;
-  transform: translateY(-50%) translateX(1px);
+  background: linear-gradient(
+    to bottom,
+    var(--gf-color-primary) 0%,
+    var(--gf-color-primary) 20%,
+    transparent 20%,
+    transparent 40%,
+    var(--gf-color-primary) 40%,
+    var(--gf-color-primary) 60%,
+    transparent 60%,
+    transparent 80%,
+    var(--gf-color-primary) 80%,
+    var(--gf-color-primary) 100%
+  );
 }
 
-/* визуальный маркер того, куда вставится колонка при drop */
+/* Индикатор места вставки колонки */
 .gf-table__head-cell--drop-target {
   position: relative;
-  background: linear-gradient(
-    to right,
-    rgba(59, 130, 246, 0.06) 0%,
-    rgba(59, 130, 246, 0.04) 50%,
-    rgba(59, 130, 246, 0.06) 100%
-  ) !important;
-  transition: background 0.2s ease;
+  background: var(--gf-bg-selected) !important;
 }
 
-/* Красивая вертикальная линия-индикатор места вставки */
 .gf-table__head-cell--drop-target::before {
   content: '';
   position: absolute;
   top: 0;
   left: -2px;
-  width: 4px;
+  width: 3px;
   height: 100%;
-  background: linear-gradient(
-    to bottom,
-    rgba(59, 130, 246, 0.95) 0%,
-    #3b82f6 30%,
-    #2563eb 50%,
-    #3b82f6 70%,
-    rgba(59, 130, 246, 0.95) 100%
-  );
+  background: var(--gf-color-primary);
   border-radius: 2px;
-  box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.4),
-    0 0 10px rgba(59, 130, 246, 0.5),
-    0 0 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 1px rgba(30, 64, 175, 0.2);
   pointer-events: none;
-  z-index: 10;
-  animation: dropTargetPulse 1.5s ease-in-out infinite;
+  z-index: 15;
+  animation: dropTargetPulse 2s ease-in-out infinite;
 }
 
-/* Анимация пульсации для линии */
 @keyframes dropTargetPulse {
   0%,
   100% {
     opacity: 1;
     transform: scaleX(1);
-    box-shadow:
-      0 0 0 1px rgba(59, 130, 246, 0.4),
-      0 0 10px rgba(59, 130, 246, 0.5),
-      0 0 20px rgba(59, 130, 246, 0.3);
   }
   50% {
-    opacity: 0.9;
-    transform: scaleX(1.08);
-    box-shadow:
-      0 0 0 1.5px rgba(59, 130, 246, 0.6),
-      0 0 14px rgba(59, 130, 246, 0.7),
-      0 0 28px rgba(59, 130, 246, 0.4);
+    opacity: 0.8;
+    transform: scaleX(1.05);
   }
 }
 
-.gf-table__head-row .gf-table__head-cell:last-child {
-  border-right: none;
+/* Resizer */
+.gf-table__head-cell__resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 100%;
+  touch-action: none;
+  cursor: col-resize;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  z-index: 2;
 }
 
-/* еле заметный hover по заголовку, чтобы показать интерактивность */
-.gf-table__head-cell:hover {
-  background-color: #f1f3f5;
+.gf-table__head-cell__resizer::before {
+  position: absolute;
+  top: 20%;
+  right: 7px;
+  display: block;
+  width: 1px;
+  height: 60%;
+  content: '';
+  background-color: var(--gf-border-color);
+  border-radius: 1px;
+  transition: all 0.2s ease;
 }
 
-.gf-table__head-cell__content {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.gf-table__head-cell:hover .gf-table__head-cell__resizer::before {
+  background-color: var(--gf-text-tertiary);
+  opacity: 0.6;
+}
+
+.gf-table__head-cell__resizer:hover::before {
+  background-color: var(--gf-color-primary);
+  width: 2px;
+  right: 6px;
+  box-shadow: 0 0 0 1px rgba(30, 64, 175, 0.1);
+}
+
+.gf-table__head-cell__resizer--resizing::before {
+  background-color: var(--gf-color-primary);
+  width: 2px;
+  right: 6px;
+  box-shadow: 0 0 0 1px rgba(30, 64, 175, 0.2);
 }
 
 .gf-table__head-cell--resizing {
@@ -344,87 +459,118 @@
   pointer-events: none;
 }
 
-/* Resizer */
-.gf-table__head-cell__resizer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  /* широкий hit-area, но сама линия остаётся тонкой */
-  width: 16px;
-  height: 100%;
-  touch-action: none;
-  cursor: col-resize;
-  user-select: none;
-  /* по умолчанию слегка видимая линия, чтобы было понятно, что колонку можно тянуть */
-  opacity: 1;
-  transition:
-    opacity 0.12s ease,
-    background-color 0.12s ease;
-  z-index: 1;
-}
+/* ==========================================================================
+   Тело таблицы
+   ========================================================================== */
 
-.gf-table__head-cell__resizer::before {
-  position: absolute;
-  top: 16%;
-  right: 6px;
-  display: block;
-  width: 1px;
-  height: 60%;
-  content: '';
-  background-color: rgba(203, 213, 225, 0.9); /* тонкий светло-серый разделитель */
-  border-radius: 2px;
-  transition: all 0.12s ease;
-}
-
-.gf-table__head-cell:hover .gf-table__head-cell__resizer {
-  opacity: 1;
-}
-
-.gf-table__head-cell__resizer:hover::before {
-  background-color: #3b82f6;
-  width: 3px;
-  right: 5px;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35);
-}
-
-.gf-table__head-cell__resizer--resizing::before {
-  background-color: #2563eb;
-  width: 3px;
-  right: 5px;
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.45);
-}
-
-/* Body styles */
 .gf-table__body-row {
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--gf-border-color);
   transition: background-color 0.15s ease;
+  background-color: var(--gf-bg-base);
 }
 
 .gf-table__body-row:hover {
-  background-color: #f8f9fa;
+  background-color: var(--gf-bg-hover);
+}
+
+.gf-table__body-row:last-child {
+  border-bottom: none;
 }
 
 .gf-table__body-cell {
-  padding: 12px 16px;
+  padding: var(--gf-spacing-lg) var(--gf-spacing-xl);
   font-size: 14px;
-  color: #212529;
+  line-height: 1.6;
+  color: var(--gf-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
-  /* тонкий разделитель для логической сетки в теле */
-  border-right: 1px solid #f1f3f5;
+  border-right: 1px solid var(--gf-border-color-light);
+  font-weight: 400;
 }
 
 .gf-table__body-row .gf-table__body-cell:last-child {
   border-right: none;
 }
 
-/* Empty state */
-.gf-table__body:empty::after {
-  content: 'Нет данных';
-  display: block;
-  padding: 40px;
+/* ==========================================================================
+   Empty state
+   ========================================================================== */
+
+.gf-table__empty {
+  padding: var(--gf-spacing-xl) * 2;
   text-align: center;
-  color: #6c757d;
+  color: var(--gf-text-tertiary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   Scrollbar стилизация (для браузеров с поддержкой)
+   ========================================================================== */
+
+.gf-table__wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.gf-table__wrapper::-webkit-scrollbar-track {
+  background: var(--gf-bg-header);
+  border-radius: var(--gf-radius-sm);
+}
+
+.gf-table__wrapper::-webkit-scrollbar-thumb {
+  background: var(--gf-border-color-strong);
+  border-radius: var(--gf-radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.gf-table__wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--gf-text-tertiary);
+}
+
+.gf-table__column-menu-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.gf-table__column-menu-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gf-table__column-menu-content::-webkit-scrollbar-thumb {
+  background: var(--gf-border-color);
+  border-radius: var(--gf-radius-sm);
+}
+
+.gf-table__column-menu-content::-webkit-scrollbar-thumb:hover {
+  background: var(--gf-border-color-strong);
+}
+
+/* ==========================================================================
+   Accessibility улучшения
+   ========================================================================== */
+
+.gf-table__head-cell:focus,
+.gf-table__body-cell:focus {
+  outline: 2px solid var(--gf-color-primary);
+  outline-offset: -2px;
+  z-index: 5;
+}
+
+/* Улучшенная читаемость для людей с нарушениями зрения */
+@media (prefers-contrast: high) {
+  .gf-table {
+    --gf-border-color: #64748b;
+    --gf-border-color-strong: #475569;
+    --gf-text-primary: #0f172a;
+  }
+}
+
+/* Уменьшенная анимация для пользователей, предпочитающих меньше движения */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
