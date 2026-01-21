@@ -18,6 +18,12 @@
   table-layout: fixed;
 }
 
+/* В scroll-режиме даём таблице возможность быть шире контейнера */
+.gf-table__table--scroll {
+  /* В scroll-режиме используем auto layout для учёта ширин колонок */
+  table-layout: auto;
+}
+
 /* Head styles */
 .gf-table__head {
   background-color: #f8f9fa;
@@ -38,6 +44,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+  /* лёгкий вертикальный разделитель между колонками */
+  border-right: 1px solid #edf1f5;
+}
+
+.gf-table__head-row .gf-table__head-cell:last-child {
+  border-right: none;
+}
+
+/* еле заметный hover по заголовку, чтобы показать интерактивность */
+.gf-table__head-cell:hover {
+  background-color: #f1f3f5;
 }
 
 .gf-table__head-cell__content {
@@ -60,27 +77,31 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 12px;
+  /* широкий hit-area, но сама линия остаётся тонкой */
+  width: 16px;
   height: 100%;
   touch-action: none;
   cursor: col-resize;
   user-select: none;
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  /* по умолчанию слегка видимая линия, чтобы было понятно, что колонку можно тянуть */
+  opacity: 1;
+  transition:
+    opacity 0.12s ease,
+    background-color 0.12s ease;
   z-index: 1;
 }
 
 .gf-table__head-cell__resizer::before {
   position: absolute;
-  top: 20%;
-  right: 4px;
+  top: 16%;
+  right: 6px;
   display: block;
-  width: 2px;
+  width: 1px;
   height: 60%;
   content: '';
-  background-color: rgba(226, 232, 240, 0.5);
+  background-color: rgba(203, 213, 225, 0.9); /* тонкий светло-серый разделитель */
   border-radius: 2px;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .gf-table__head-cell:hover .gf-table__head-cell__resizer {
@@ -90,15 +111,15 @@
 .gf-table__head-cell__resizer:hover::before {
   background-color: #3b82f6;
   width: 3px;
-  right: 3px;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  right: 5px;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35);
 }
 
 .gf-table__head-cell__resizer--resizing::before {
   background-color: #2563eb;
   width: 3px;
-  right: 3px;
-  box-shadow: 0 0 12px rgba(37, 99, 235, 0.35);
+  right: 5px;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.45);
 }
 
 /* Body styles */
@@ -119,6 +140,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+  /* тонкий разделитель для логической сетки в теле */
+  border-right: 1px solid #f1f3f5;
+}
+
+.gf-table__body-row .gf-table__body-cell:last-child {
+  border-right: none;
 }
 
 /* Empty state */

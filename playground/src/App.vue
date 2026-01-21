@@ -6,135 +6,49 @@
         <p>Тестовая страница для проверки работы таблицы</p>
       </header>
 
-      <main class="main">
-        <section class="section">
-          <h2>Базовая таблица</h2>
-          <GridforgeTable :data="sampleData" :columns="columns" />
-        </section>
+      <div class="layout">
+        <aside class="sidebar">
+          <nav class="sidebar-nav">
+            <button
+              class="sidebar-nav__item"
+              :class="{ 'sidebar-nav__item--active': activePage === 'basic' }"
+              @click="activePage = 'basic'"
+            >
+              Базовая таблица
+            </button>
+            <button
+              class="sidebar-nav__item"
+              :class="{ 'sidebar-nav__item--active': activePage === 'scroll' }"
+              @click="activePage = 'scroll'"
+            >
+              Таблица с горизонтальным скроллом
+            </button>
+          </nav>
+        </aside>
 
-        <section class="section">
-          <h2>Таблица с фиксированными ширинами</h2>
-          <GridforgeTable :data="sampleData" :columns="columnsWithWidths" />
-        </section>
-
-        <section class="section">
-          <h2>Таблица с разными типами данных</h2>
-          <GridforgeTable :data="mixedData" :columns="mixedColumns" />
-        </section>
-      </main>
+        <main class="main">
+          <BasicTableDemo v-if="activePage === 'basic'" />
+          <ScrollTableDemo v-else-if="activePage === 'scroll'" />
+        </main>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { GridforgeTable } from '@/index';
-import type { TableColumn, TableRow } from '@/types';
+import BasicTableDemo from './components/BasicTableDemo.vue';
+import ScrollTableDemo from './components/ScrollTableDemo.vue';
 
 export default Vue.extend({
   name: 'App',
   components: {
-    GridforgeTable,
+    BasicTableDemo,
+    ScrollTableDemo,
   },
   data() {
     return {
-      // Базовые колонки без указания ширины
-      columns: [
-        { header: 'ID', field: 'id', columnKey: 'id' },
-        { header: 'Имя', field: 'name', columnKey: 'name' },
-        { header: 'Email', field: 'email', columnKey: 'email' },
-        { header: 'Возраст', field: 'age', columnKey: 'age' },
-        { header: 'Город', field: 'city', columnKey: 'city' },
-      ] as TableColumn[],
-
-      // Колонки с фиксированными ширинами
-      columnsWithWidths: [
-        { header: 'ID', field: 'id', columnKey: 'id', width: 80 },
-        { header: 'Имя', field: 'name', columnKey: 'name', width: 200 },
-        { header: 'Email', field: 'email', columnKey: 'email', width: 250 },
-        { header: 'Возраст', field: 'age', columnKey: 'age', width: 100 },
-        { header: 'Город', field: 'city', columnKey: 'city', width: 150 },
-      ] as TableColumn[],
-
-      // Колонки для смешанных данных
-      mixedColumns: [
-        { header: 'ID', field: 'id', columnKey: 'id', width: 80 },
-        { header: 'Название', field: 'title', columnKey: 'title', width: 300 },
-        { header: 'Цена', field: 'price', columnKey: 'price', width: 120 },
-        { header: 'В наличии', field: 'inStock', columnKey: 'inStock', width: 120 },
-        { header: 'Дата', field: 'date', columnKey: 'date', width: 150 },
-      ] as TableColumn[],
-
-      // Пример данных
-      sampleData: [
-        {
-          id: 1,
-          name: 'Иван Иванов',
-          email: 'ivan@example.com',
-          age: 25,
-          city: 'Москва',
-        },
-        {
-          id: 2,
-          name: 'Петр Петров',
-          email: 'petr@example.com',
-          age: 30,
-          city: 'Санкт-Петербург',
-        },
-        {
-          id: 3,
-          name: 'Мария Сидорова',
-          email: 'maria@example.com',
-          age: 28,
-          city: 'Казань',
-        },
-        {
-          id: 4,
-          name: 'Алексей Смирнов',
-          email: 'alex@example.com',
-          age: 35,
-          city: 'Новосибирск',
-        },
-        {
-          id: 5,
-          name: 'Елена Козлова',
-          email: 'elena@example.com',
-          age: 27,
-          city: 'Екатеринбург',
-        },
-      ] as TableRow[],
-
-      // Смешанные данные
-      mixedData: [
-        {
-          id: 1,
-          title: 'Ноутбук',
-          price: 50000,
-          inStock: true,
-          date: '2024-01-15',
-        },
-        {
-          id: 2,
-          title: 'Мышь',
-          price: 1500,
-          inStock: false,
-          date: '2024-01-20',
-        },
-        {
-          id: 3,
-          title: 'Клавиатура',
-          price: 3000,
-          inStock: true,
-          date: '2024-02-01',
-        },
-        {
-          id: 4,
-          title: 'Монитор',
-          price: 25000,
-          inStock: true,
-          date: '2024-02-10',
-        },
-      ] as TableRow[],
+      activePage: 'basic' as 'basic' | 'scroll',
     };
   },
 });
@@ -148,8 +62,8 @@ export default Vue.extend({
 }
 
 #app {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -161,6 +75,54 @@ export default Vue.extend({
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.sidebar {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-nav__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: #495057;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.sidebar-nav__item:hover {
+  background-color: #f1f3f5;
+}
+
+.sidebar-nav__item--active {
+  background-color: #0d6efd;
+  color: #ffffff;
 }
 
 .header {
@@ -186,6 +148,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   gap: 30px;
+  /* важно для grid: позволяем содержимому ужиматься и не растягивать всю страницу */
+  min-width: 0;
 }
 
 .section {
@@ -193,6 +157,8 @@ export default Vue.extend({
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* чтобы таблица внутри могла скроллиться, а не растягивать колонку grid */
+  min-width: 0;
 }
 
 .section h2 {
@@ -201,5 +167,21 @@ export default Vue.extend({
   color: #2c3e50;
   border-bottom: 2px solid #e9ecef;
   padding-bottom: 10px;
+}
+
+.section__description {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
 }
 </style>
