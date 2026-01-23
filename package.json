@@ -1,14 +1,12 @@
 {
   "name": "gridforge-vue2",
   "version": "0.1.0",
-  "description": "A flexible Vue 2 table component library with column reordering, resizing, and visibility controls",
+  "description": "A flexible Vue 2 table component library with column reordering, resizing, visibility controls, sorting, and pagination",
   "type": "module",
   "main": "dist/gridforge-vue2.umd.js",
   "module": "dist/gridforge-vue2.es.js",
-  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "import": "./dist/gridforge-vue2.es.js",
       "require": "./dist/gridforge-vue2.umd.js"
     },
@@ -20,9 +18,12 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "vite build && vue-tsc --emitDeclarationOnly --project tsconfig.build.json",
+    "build": "vite build",
+    "build:types": "vue-tsc --emitDeclarationOnly --project tsconfig.build.json",
+    "build:all": "vite build && vue-tsc --emitDeclarationOnly --project tsconfig.build.json",
     "lint": "eslint . --max-warnings 0",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "vue",
@@ -33,9 +34,11 @@
     "column-resize",
     "column-reorder",
     "column-visibility",
+    "column-sorting",
+    "pagination",
     "typescript"
   ],
-  "author": "",
+  "author": "Alexander",
   "license": "MIT",
   "peerDependencies": {
     "vue": "^2.7.8",

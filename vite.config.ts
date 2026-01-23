@@ -39,9 +39,9 @@ export default defineConfig({
           }
           return assetInfo.name || 'asset';
         },
+        // Используем named exports для избежания предупреждения
+        exports: 'named',
       },
-      // Явно исключаем playground из сборки
-      exclude: ['playground/**'],
     },
     cssCodeSplit: false,
     // Исключаем playground из исходников для сборки
