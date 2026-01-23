@@ -36,7 +36,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Header } from '@tanstack/table-core';
-import type { TableRow } from '../types';
+import type { TableRow, ColumnMeta } from '../types';
 
 export default Vue.extend({
   name: 'ColumnContextMenu',
@@ -57,7 +57,7 @@ export default Vue.extend({
   computed: {
     isFrozen(): boolean {
       if (!this.header?.column) return false;
-      const meta = (this.header.column.columnDef.meta as any) || {};
+      const meta = (this.header.column.columnDef.meta as ColumnMeta) || {};
       return meta.alignFrozen === 'left' || meta.alignFrozen === 'right';
     },
     menuStyle(): Record<string, string> {

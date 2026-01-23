@@ -1,6 +1,13 @@
 import type { Header } from '@tanstack/table-core';
-import type { TableRow } from '../types';
+import type { TableRow, ColumnMeta } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
+
+/**
+ * Вспомогательная функция для безопасного получения meta из ColumnDef
+ */
+function getColumnMeta(columnDef: { meta?: unknown }): ColumnMeta {
+  return (columnDef.meta as ColumnMeta) || {};
+}
 
 /**
  * Проверяет, можно ли перетаскивать заголовок колонки
@@ -9,7 +16,7 @@ export function canReorder(header: Header<TableRow, unknown>): boolean {
   if (!header.column || header.isPlaceholder) return false;
   
   // Закрепленные колонки нельзя перетаскивать
-  const meta = (header.column.columnDef.meta as any) || {};
+  const meta = getColumnMeta(header.column.columnDef);
   if (meta.alignFrozen === 'left' || meta.alignFrozen === 'right') {
     return false;
   }

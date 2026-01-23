@@ -17,7 +17,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Cell } from '@tanstack/table-core';
-import type { TableRow } from '../types';
+import type { TableRow, ColumnMeta } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { getCellStyle } from '../utils/columnStyles';
 
@@ -45,21 +45,21 @@ export default Vue.extend({
     cellStyle(): Record<string, string> {
       return getCellStyle(this.cell, this.table, this.layout, this.visibleColumnCount);
     },
+    columnMeta(): ColumnMeta {
+      if (!this.cell.column) return {};
+      return (this.cell.column.columnDef.meta as ColumnMeta) || {};
+    },
     isFrozenLeft(): boolean {
-      if (!this.cell.column) return false;
-      const meta = (this.cell.column.columnDef.meta as any) || {};
-      return meta.alignFrozen === 'left';
+      return this.columnMeta.alignFrozen === 'left';
     },
     isFrozenRight(): boolean {
-      if (!this.cell.column) return false;
-      const meta = (this.cell.column.columnDef.meta as any) || {};
-      return meta.alignFrozen === 'right';
+      return this.columnMeta.alignFrozen === 'right';
     },
     isLastFrozenLeft(): boolean {
       if (!this.table || !this.isFrozenLeft) return false;
       const allColumns = this.table.getAllLeafColumns();
       const leftFrozen = allColumns.filter((col) => {
-        const meta = (col.columnDef.meta as any) || {};
+        const meta = this.getColumnMetaFromDef(col.columnDef);
         return meta.alignFrozen === 'left';
       });
       if (leftFrozen.length === 0) return false;
@@ -70,7 +70,7 @@ export default Vue.extend({
       if (!this.table || !this.isFrozenRight) return false;
       const allColumns = this.table.getAllLeafColumns();
       const rightFrozen = allColumns.filter((col) => {
-        const meta = (col.columnDef.meta as any) || {};
+        const meta = this.getColumnMetaFromDef(col.columnDef);
         return meta.alignFrozen === 'right';
       });
       if (rightFrozen.length === 0) return false;

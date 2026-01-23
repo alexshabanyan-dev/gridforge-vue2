@@ -4,6 +4,14 @@
 export type TableRow = Record<string, unknown>;
 
 /**
+ * Метаданные колонки в TanStack Table
+ */
+export interface ColumnMeta {
+  alignFrozen?: 'left' | 'right';
+  sortable?: boolean;
+}
+
+/**
  * Определение колонки таблицы
  */
 export interface TableColumn<T = TableRow> {

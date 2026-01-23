@@ -40,7 +40,11 @@ export default defineConfig({
           return assetInfo.name || 'asset';
         },
       },
+      // Явно исключаем playground из сборки
+      exclude: ['playground/**'],
     },
     cssCodeSplit: false,
+    // Исключаем playground из исходников для сборки
+    emptyOutDir: true,
   },
 });

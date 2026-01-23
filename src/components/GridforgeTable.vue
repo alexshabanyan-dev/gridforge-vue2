@@ -439,13 +439,14 @@ export default Vue.extend({
         nextSort = [...currentSort, { id: columnId, desc: false }];
       } else {
         const existing = currentSort[existingIndex];
-        if (!existing.desc) {
-          // ASC -> DESC
-          nextSort = [...currentSort];
-          nextSort[existingIndex] = { id: columnId, desc: true };
-        } else {
+        if (existing.desc) {
           // DESC -> None (удаляем из массива)
           nextSort = currentSort.filter((_, index) => index !== existingIndex);
+        } else {
+          // ASC -> DESC
+          nextSort = currentSort.map((sort, index) =>
+            index === existingIndex ? { id: columnId, desc: true } : sort,
+          );
         }
       }
 

@@ -14,6 +14,7 @@ export type {
   PaginationWithFlags,
   SortState,
   SortDirection,
+  ColumnMeta,
 } from './types';
 
 // Plugin installation for Vue 2

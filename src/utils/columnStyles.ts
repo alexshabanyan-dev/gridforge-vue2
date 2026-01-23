@@ -1,7 +1,14 @@
-import type { TableColumn } from '../types';
+import type { TableColumn, ColumnMeta } from '../types';
 import type { Header, Cell } from '@tanstack/table-core';
 import type { TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
+
+/**
+ * Вспомогательная функция для безопасного получения meta из ColumnDef
+ */
+function getColumnMeta(columnDef: { meta?: unknown }): ColumnMeta {
+  return (columnDef.meta as ColumnMeta) || {};
+}
 
 /**
  * Вычисляет позицию left для закрепленной колонки слева
@@ -19,7 +26,7 @@ function calculateFrozenLeftPosition(
   // Получаем все закрепленные слева колонки в порядке их следования в таблице
   const leftFrozenColumns: Array<{ id: string; size: number }> = [];
   allColumns.forEach((col) => {
-    const meta = (col.columnDef.meta as any) || {};
+    const meta = getColumnMeta(col.columnDef);
     if (meta.alignFrozen === 'left') {
       leftFrozenColumns.push({
         id: col.id as string,
@@ -57,7 +64,7 @@ function calculateFrozenRightPosition(
   // Получаем все закрепленные справа колонки в порядке их следования в таблице
   const rightFrozenColumns: Array<{ id: string; size: number }> = [];
   allColumns.forEach((col) => {
-    const meta = (col.columnDef.meta as any) || {};
+    const meta = getColumnMeta(col.columnDef);
     if (meta.alignFrozen === 'right') {
       rightFrozenColumns.push({
         id: col.id as string,
@@ -122,7 +129,7 @@ export function getHeaderStyle(
   const size = header.getSize();
   if (!size) return {};
 
-  const meta = (header.column.columnDef.meta as any) || {};
+  const meta = getColumnMeta(header.column.columnDef);
   const alignFrozen = meta.alignFrozen;
 
   const baseStyles: Record<string, string> = {};
@@ -179,7 +186,7 @@ export function getCellStyle(
   const size = cell.column.getSize();
   if (!size) return {};
 
-  const meta = (cell.column.columnDef.meta as any) || {};
+  const meta = getColumnMeta(cell.column.columnDef);
   const alignFrozen = meta.alignFrozen;
 
   const baseStyles: Record<string, string> = {};

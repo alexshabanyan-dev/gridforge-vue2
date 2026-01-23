@@ -43,10 +43,7 @@
           :name="sortIconName"
           :size="14"
           class="gf-table__head-cell__sort-icon"
-          :class="{
-            'gf-table__head-cell__sort-icon--asc': currentSortState && !currentSortState.desc,
-            'gf-table__head-cell__sort-icon--desc': currentSortState && currentSortState.desc,
-          }"
+          :class="sortIconClass"
         />
       </button>
     </div>
@@ -64,7 +61,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Header } from '@tanstack/table-core';
-import type { TableRow, SortState } from '../types';
+import type { TableRow, SortState, ColumnMeta } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { getHeaderStyle } from '../utils/columnStyles';
 import { canReorder as checkCanReorder } from '../utils/columnReorder';
@@ -137,21 +134,21 @@ export default Vue.extend({
       const sizingInfo = this.table.getState().columnSizingInfo;
       return sizingInfo.isResizingColumn === this.header.column.id;
     },
+    columnMeta(): ColumnMeta {
+      if (!this.header.column) return {};
+      return (this.header.column.columnDef.meta as ColumnMeta) || {};
+    },
     isFrozenLeft(): boolean {
-      if (!this.header.column) return false;
-      const meta = (this.header.column.columnDef.meta as any) || {};
-      return meta.alignFrozen === 'left';
+      return this.columnMeta.alignFrozen === 'left';
     },
     isFrozenRight(): boolean {
-      if (!this.header.column) return false;
-      const meta = (this.header.column.columnDef.meta as any) || {};
-      return meta.alignFrozen === 'right';
+      return this.columnMeta.alignFrozen === 'right';
     },
     isLastFrozenLeft(): boolean {
       if (!this.table || !this.isFrozenLeft) return false;
       const allColumns = this.table.getAllLeafColumns();
       const leftFrozen = allColumns.filter((col) => {
-        const meta = (col.columnDef.meta as any) || {};
+        const meta = this.getColumnMetaFromDef(col.columnDef);
         return meta.alignFrozen === 'left';
       });
       if (leftFrozen.length === 0) return false;
@@ -162,12 +159,15 @@ export default Vue.extend({
       if (!this.table || !this.isFrozenRight) return false;
       const allColumns = this.table.getAllLeafColumns();
       const rightFrozen = allColumns.filter((col) => {
-        const meta = (col.columnDef.meta as any) || {};
+        const meta = this.getColumnMetaFromDef(col.columnDef);
         return meta.alignFrozen === 'right';
       });
       if (rightFrozen.length === 0) return false;
       const firstFrozen = rightFrozen[0];
       return firstFrozen.id === this.header.column.id;
+    },
+    getColumnMetaFromDef(columnDef: { meta?: unknown }): ColumnMeta {
+      return (columnDef.meta as ColumnMeta) || {};
     },
     currentSortState(): SortState | undefined {
       if (!this.header.column) return undefined;
@@ -179,10 +179,15 @@ export default Vue.extend({
       if (!sortState) return 'sort';
       return sortState.desc ? 'sortDesc' : 'sortAsc';
     },
+    sortIconClass(): Record<string, boolean> {
+      const sortState = this.currentSortState;
+      return {
+        'gf-table__head-cell__sort-icon--asc': Boolean(sortState && !sortState.desc),
+        'gf-table__head-cell__sort-icon--desc': Boolean(sortState && sortState.desc),
+      };
+    },
     isSortable(): boolean {
-      if (!this.header.column) return false;
-      const meta = (this.header.column.columnDef.meta as any) || {};
-      return meta.sortable === true; // По умолчанию false, нужно явно указать true
+      return this.columnMeta.sortable === true; // По умолчанию false, нужно явно указать true
     },
   },
   methods: {

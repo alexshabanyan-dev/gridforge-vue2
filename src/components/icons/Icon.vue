@@ -28,6 +28,10 @@ const iconMap: Record<string, string> = {
   sortDesc: sortDescendingIconSvg as string,
 };
 
+// Константы для иконок сортировки (вынесены для оптимизации)
+const STROKE_SORT_ICONS = ['sortAsc', 'sortDesc'] as const;
+const ALL_SORT_ICONS = ['sort', 'sortAsc', 'sortDesc'] as const;
+
 export default Vue.extend({
   name: 'Icon',
   props: {
@@ -59,7 +63,10 @@ export default Vue.extend({
     svgContent(): string {
       const svgString = iconMap[this.name];
       if (!svgString) {
-        console.warn(`Icon "${this.name}" not found`);
+        // В development режиме предупреждаем, в production - просто возвращаем пустую строку
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`Icon "${this.name}" not found`);
+        }
         return '';
       }
 
@@ -69,8 +76,7 @@ export default Vue.extend({
         .replace(/height="\d+"/g, `height="${this.size}"`);
 
       // Для иконок сортировки с stroke уменьшаем stroke-width пропорционально размеру
-      const strokeSortIcons = ['sortAsc', 'sortDesc'];
-      if (strokeSortIcons.includes(this.name)) {
+      if (STROKE_SORT_ICONS.includes(this.name as any)) {
         // stroke-width="2" для размера 24px, для меньших размеров уменьшаем пропорционально
         const baseSize = 24;
         const baseStrokeWidth = 2;
@@ -84,8 +90,7 @@ export default Vue.extend({
       }
       
       // Для всех иконок сортировки добавляем preserveAspectRatio для правильного масштабирования
-      const sortIcons = ['sort', 'sortAsc', 'sortDesc'];
-      if (sortIcons.includes(this.name) && !content.includes('preserveAspectRatio=')) {
+      if (ALL_SORT_ICONS.includes(this.name as any) && !content.includes('preserveAspectRatio=')) {
         if (content.includes('viewBox=')) {
           content = content.replace(
             /(<svg[^>]*viewBox="[^"]*")/,
