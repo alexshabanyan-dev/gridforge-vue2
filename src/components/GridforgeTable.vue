@@ -20,6 +20,15 @@
         <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
       </table>
     </div>
+    <TableFooter
+      v-if="showPagination"
+      :page-size="currentPageSize"
+      :page-size-options="pageSizeOptions"
+      :pagination="pagination"
+      :pagination-flags="paginationFlags"
+      @page-size-change="onPageSizeChange"
+      @page-change="onPageChange"
+    />
     <ColumnContextMenu
       :visible="contextMenuVisible"
       :header="contextMenuHeader"
@@ -42,7 +51,9 @@ import { handleDragStart, handleDragOver, handleDrop } from '../utils/columnReor
 import TableBar from './TableBar.vue';
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
+import TableFooter from './TableFooter.vue';
 import ColumnContextMenu from './ColumnContextMenu.vue';
+import type { PaginationWithTotal, PaginationWithFlags } from '../types';
 
 export default Vue.extend({
   name: 'GridforgeTable',
@@ -50,6 +61,7 @@ export default Vue.extend({
     TableBar,
     TableHeader,
     TableBody,
+    TableFooter,
     ColumnContextMenu,
   },
   props: {
@@ -74,6 +86,22 @@ export default Vue.extend({
     layout: {
       type: String as PropType<'fit' | 'scroll'>,
       default: 'fit',
+    },
+    pageSize: {
+      type: Number,
+      default: 10,
+    },
+    pageSizeOptions: {
+      type: Array as PropType<number[]>,
+      default: () => [10, 20, 50, 100, 200],
+    },
+    pagination: {
+      type: Object as PropType<PaginationWithTotal | undefined>,
+      default: undefined,
+    },
+    paginationFlags: {
+      type: Object as PropType<PaginationWithFlags | undefined>,
+      default: undefined,
     },
   },
   data() {
@@ -105,6 +133,12 @@ export default Vue.extend({
       return this.table.getAllLeafColumns() as any[];
     },
     // Переупорядочиваем колонки: закрепленные слева -> обычные -> закрепленные справа
+    showPagination(): boolean {
+      return Boolean(this.pagination || this.paginationFlags);
+    },
+    currentPageSize(): number {
+      return this.pageSize;
+    },
     orderedColumns(): TableColumn[] {
       const leftFrozen: TableColumn[] = [];
       const normal: TableColumn[] = [];
@@ -376,6 +410,14 @@ export default Vue.extend({
 
       // Эмитим событие для обновления columns в родительском компоненте
       this.$emit('columns-change', reorderedColumns);
+    },
+    onPageSizeChange(newSize: number) {
+      // Эмитим событие, но не меняем локально - ждем обновления пропса
+      this.$emit('page-size-change', newSize);
+    },
+    onPageChange(page: number | 'previous' | 'next') {
+      // Эмитим событие для изменения страницы
+      this.$emit('page-change', page);
     },
   },
 });

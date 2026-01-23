@@ -30,6 +30,30 @@ export interface TableColumn<T = TableRow> {
 }
 
 /**
+ * Параметры пагинации с известным общим количеством элементов
+ */
+export interface PaginationWithTotal {
+  /** Общее количество элементов */
+  totalElements: number;
+  /** Текущая страница (начиная с 0) */
+  currentPage: number;
+  /** Размер страницы */
+  pageSize: number;
+}
+
+/**
+ * Параметры пагинации без известного общего количества
+ */
+export interface PaginationWithFlags {
+  /** Первая ли это страница */
+  isFirst: boolean;
+  /** Последняя ли это страница */
+  isLast: boolean;
+  /** Размер страницы */
+  pageSize: number;
+}
+
+/**
  * Props для компонента GridforgeTable
  */
 export interface GridforgeTableProps<T = TableRow> {
@@ -41,4 +65,12 @@ export interface GridforgeTableProps<T = TableRow> {
   tableKey?: string;
   /** Класс для корневого элемента */
   customClass?: string;
+  /** Размер страницы (по умолчанию 10) */
+  pageSize?: number;
+  /** Доступные размеры страницы (по умолчанию [10, 20, 50, 100, 200]) */
+  pageSizeOptions?: number[];
+  /** Пагинация с известным общим количеством элементов */
+  pagination?: PaginationWithTotal;
+  /** Пагинация без известного общего количества (используется isFirst/isLast) */
+  paginationFlags?: PaginationWithFlags;
 }
