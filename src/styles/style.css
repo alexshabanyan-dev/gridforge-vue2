@@ -263,6 +263,46 @@
   font-weight: 500;
 }
 
+/* Контекстное меню для заголовков колонок */
+.gf-table__column-context-menu {
+  min-width: 180px;
+  background-color: var(--gf-bg-base);
+  border-radius: var(--gf-radius-lg);
+  border: 1px solid var(--gf-border-color);
+  box-shadow: 
+    0 4px 6px -1px rgba(15, 23, 42, 0.1),
+    0 2px 4px -1px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+  padding: var(--gf-spacing-xs) 0;
+}
+
+.gf-table__column-context-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: var(--gf-spacing-sm) var(--gf-spacing-xl);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  font-size: 14px;
+  color: var(--gf-text-primary);
+  font-weight: 400;
+}
+
+.gf-table__column-context-menu-item:hover {
+  background-color: var(--gf-bg-hover);
+  color: var(--gf-text-primary);
+  font-weight: 500;
+}
+
+.gf-table__column-context-menu-item:focus {
+  outline: none;
+  background-color: var(--gf-bg-hover);
+}
+
 /* ==========================================================================
    Wrapper и таблица
    ========================================================================== */
@@ -482,6 +522,148 @@
 .gf-table__head-cell--resizing * {
   user-select: none;
   pointer-events: none;
+}
+
+/* Закрепленные колонки */
+.gf-table__head-cell--frozen-left,
+.gf-table__head-cell--frozen-right {
+  background-color: var(--gf-bg-header) !important;
+  position: relative;
+}
+
+.gf-table__head-cell--frozen-left {
+  border-right: 1px solid var(--gf-border-color-light);
+}
+
+.gf-table__head-cell--frozen-right {
+  border-right: 1px solid var(--gf-border-color-light);
+}
+
+/* Выделение границы только у последней закрепленной слева колонки */
+.gf-table__head-cell--frozen-left-border {
+  background: linear-gradient(
+    to bottom,
+    var(--gf-bg-header),
+    #f1f5f9
+  ) !important;
+}
+
+.gf-table__head-cell--frozen-left-border::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--gf-color-primary-light),
+    var(--gf-color-primary)
+  );
+  opacity: 0.6;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: 2px 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Выделение границы только у первой закрепленной справа колонки */
+.gf-table__head-cell--frozen-right-border {
+  background: linear-gradient(
+    to bottom,
+    var(--gf-bg-header),
+    #f1f5f9
+  ) !important;
+  border-left: 1px solid var(--gf-border-color);
+}
+
+.gf-table__head-cell--frozen-right-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--gf-color-primary-light),
+    var(--gf-color-primary)
+  );
+  opacity: 0.6;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: -2px 0 4px rgba(37, 99, 235, 0.2);
+}
+
+.gf-table__body-cell--frozen-left,
+.gf-table__body-cell--frozen-right {
+  background-color: var(--gf-bg-base) !important;
+  position: relative;
+}
+
+.gf-table__body-cell--frozen-left {
+  border-right: 1px solid var(--gf-border-color-light);
+}
+
+.gf-table__body-cell--frozen-right {
+  border-right: 1px solid var(--gf-border-color-light);
+}
+
+/* Выделение границы только у последней закрепленной слева колонки в body */
+.gf-table__body-cell--frozen-left-border {
+  background: #fafbfc !important;
+}
+
+.gf-table__body-cell--frozen-left-border::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--gf-color-primary-light),
+    var(--gf-color-primary)
+  );
+  opacity: 0.5;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: 2px 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* Выделение границы только у первой закрепленной справа колонки в body */
+.gf-table__body-cell--frozen-right-border {
+  background: #fafbfc !important;
+  border-left: 1px solid var(--gf-border-color);
+}
+
+.gf-table__body-cell--frozen-right-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--gf-color-primary-light),
+    var(--gf-color-primary)
+  );
+  opacity: 0.5;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: -2px 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* Тени для граничных закрепленных колонок при прокрутке */
+.gf-table__head-cell--frozen-left-border,
+.gf-table__body-cell--frozen-left-border {
+  box-shadow: 2px 0 12px -2px rgba(0, 0, 0, 0.06);
+}
+
+.gf-table__head-cell--frozen-right-border,
+.gf-table__body-cell--frozen-right-border {
+  box-shadow: -2px 0 12px -2px rgba(0, 0, 0, 0.06);
 }
 
 /* ==========================================================================

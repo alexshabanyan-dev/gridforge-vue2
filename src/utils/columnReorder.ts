@@ -6,7 +6,15 @@ import type { GridforgeTableInstance } from '../tableCore';
  * Проверяет, можно ли перетаскивать заголовок колонки
  */
 export function canReorder(header: Header<TableRow, unknown>): boolean {
-  return Boolean(header.column && !header.isPlaceholder);
+  if (!header.column || header.isPlaceholder) return false;
+  
+  // Закрепленные колонки нельзя перетаскивать
+  const meta = (header.column.columnDef.meta as any) || {};
+  if (meta.alignFrozen === 'left' || meta.alignFrozen === 'right') {
+    return false;
+  }
+  
+  return true;
 }
 
 /**

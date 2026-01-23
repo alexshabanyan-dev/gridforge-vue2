@@ -15,10 +15,18 @@
           @drop="onHeaderDrop"
           @drag-end="onHeaderDragEnd"
           @drag-leave="onHeaderDragLeave"
+          @context-menu="onHeaderContextMenu"
         />
         <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
       </table>
     </div>
+    <ColumnContextMenu
+      :visible="contextMenuVisible"
+      :header="contextMenuHeader"
+      :position="contextMenuPosition"
+      @freeze="onColumnFreeze"
+      @hide="onContextMenuHide"
+    />
   </div>
 </template>
 
@@ -34,6 +42,7 @@ import { handleDragStart, handleDragOver, handleDrop } from '../utils/columnReor
 import TableBar from './TableBar.vue';
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
+import ColumnContextMenu from './ColumnContextMenu.vue';
 
 export default Vue.extend({
   name: 'GridforgeTable',
@@ -41,6 +50,7 @@ export default Vue.extend({
     TableBar,
     TableHeader,
     TableBody,
+    ColumnContextMenu,
   },
   props: {
     data: {
@@ -72,6 +82,9 @@ export default Vue.extend({
       draggedColumnId: null as string | null,
       dragOverColumnId: null as string | null,
       previousColumnSizing: {} as Record<string, number>,
+      contextMenuVisible: false,
+      contextMenuHeader: null as Header<TableRow, unknown> | null,
+      contextMenuPosition: null as { x: number; y: number } | null,
     };
   },
   computed: {
@@ -91,6 +104,48 @@ export default Vue.extend({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return this.table.getAllLeafColumns() as any[];
     },
+    // Переупорядочиваем колонки: закрепленные слева -> обычные -> закрепленные справа
+    orderedColumns(): TableColumn[] {
+      const leftFrozen: TableColumn[] = [];
+      const normal: TableColumn[] = [];
+      const rightFrozen: TableColumn[] = [];
+
+      // Сохраняем исходный порядок для правильной сортировки внутри групп
+      const originalOrder = new Map<string, number>();
+      this.columns.forEach((col, index) => {
+        const colId = String(col.columnKey || col.field);
+        originalOrder.set(colId, index);
+      });
+
+      this.columns.forEach((col) => {
+        if (col.alignFrozen === 'left') {
+          leftFrozen.push(col);
+        } else if (col.alignFrozen === 'right') {
+          rightFrozen.push(col);
+        } else {
+          normal.push(col);
+        }
+      });
+
+      // Сохраняем порядок внутри каждой группы на основе исходного порядка
+      const leftFrozenOrdered = leftFrozen.sort((a, b) => {
+        const aId = String(a.columnKey || a.field);
+        const bId = String(b.columnKey || b.field);
+        const aIndex = originalOrder.get(aId) ?? 0;
+        const bIndex = originalOrder.get(bId) ?? 0;
+        return aIndex - bIndex;
+      });
+
+      const rightFrozenOrdered = rightFrozen.sort((a, b) => {
+        const aId = String(a.columnKey || a.field);
+        const bId = String(b.columnKey || b.field);
+        const aIndex = originalOrder.get(aId) ?? 0;
+        const bIndex = originalOrder.get(bId) ?? 0;
+        return aIndex - bIndex;
+      });
+
+      return [...leftFrozenOrdered, ...normal, ...rightFrozenOrdered];
+    },
   },
   watch: {
     data: {
@@ -105,6 +160,7 @@ export default Vue.extend({
         // Пересчитываем автоматические minSize после изменения колонок
         this.$nextTick(() => {
           this.updateAutoMinSizes();
+          this.$forceUpdate();
         });
       },
       deep: true,
@@ -128,9 +184,10 @@ export default Vue.extend({
   },
   methods: {
     buildTable() {
+      // Используем переупорядоченные колонки для построения таблицы
       this.table = buildTable(
         this.data || [],
-        this.columns || [],
+        this.orderedColumns || [],
         this.layout as 'fit' | 'scroll',
         () => this.previousColumnSizing,
         (sizing) => {
@@ -152,7 +209,7 @@ export default Vue.extend({
 
       const { hasChanges, columnSizing } = updateAutoMinSizes(
         this.table,
-        this.columns,
+        this.orderedColumns,
         headerCells,
       );
 
@@ -231,6 +288,94 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.$forceUpdate();
       });
+    },
+    onHeaderContextMenu(header: Header<TableRow, unknown>, event: MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.contextMenuHeader = header;
+      this.contextMenuPosition = { x: event.clientX, y: event.clientY };
+      this.contextMenuVisible = true;
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+    },
+    onContextMenuHide() {
+      this.contextMenuVisible = false;
+      this.contextMenuHeader = null;
+      this.contextMenuPosition = null;
+    },
+    onColumnFreeze(alignFrozen: 'left' | 'right' | null) {
+      if (!this.contextMenuHeader?.column) return;
+
+      const columnId = this.contextMenuHeader.column.id as string;
+
+      // Сначала обновляем свойство alignFrozen у нужной колонки
+      const updatedColumns = this.columns.map((col) => {
+        const colId = String(col.columnKey || col.field);
+        if (colId === columnId) {
+          // Обновляем только выбранную колонку
+          const updated: TableColumn = {
+            ...col,
+          };
+          if (alignFrozen) {
+            updated.alignFrozen = alignFrozen;
+          } else {
+            // Удаляем alignFrozen, создавая новый объект без этого свойства
+            const { alignFrozen: _, ...rest } = updated;
+            return rest;
+          }
+          return updated;
+        }
+        // Возвращаем колонку как есть, без изменений
+        return col;
+      });
+
+      // Переупорядочиваем колонки: закрепленные слева -> обычные -> закрепленные справа
+      // Сохраняем исходный порядок для правильной сортировки внутри групп
+      const originalOrder = new Map<string, number>();
+      updatedColumns.forEach((col, index) => {
+        const colId = String(col.columnKey || col.field);
+        originalOrder.set(colId, index);
+      });
+
+      const leftFrozen: TableColumn[] = [];
+      const normal: TableColumn[] = [];
+      const rightFrozen: TableColumn[] = [];
+
+      updatedColumns.forEach((col) => {
+        if (col.alignFrozen === 'left') {
+          leftFrozen.push(col);
+        } else if (col.alignFrozen === 'right') {
+          rightFrozen.push(col);
+        } else {
+          normal.push(col);
+        }
+      });
+
+      // Сохраняем порядок внутри каждой группы на основе исходного порядка
+      const leftFrozenOrdered = leftFrozen.sort((a, b) => {
+        const aId = String(a.columnKey || a.field);
+        const bId = String(b.columnKey || b.field);
+        const aIndex = originalOrder.get(aId) ?? 0;
+        const bIndex = originalOrder.get(bId) ?? 0;
+        return aIndex - bIndex;
+      });
+
+      const rightFrozenOrdered = rightFrozen.sort((a, b) => {
+        const aId = String(a.columnKey || a.field);
+        const bId = String(b.columnKey || b.field);
+        const aIndex = originalOrder.get(aId) ?? 0;
+        const bIndex = originalOrder.get(bId) ?? 0;
+        return aIndex - bIndex;
+      });
+
+      const reorderedColumns = [...leftFrozenOrdered, ...normal, ...rightFrozenOrdered];
+
+      // Закрываем меню
+      this.onContextMenuHide();
+
+      // Эмитим событие для обновления columns в родительском компоненте
+      this.$emit('columns-change', reorderedColumns);
     },
   },
 });

@@ -47,9 +47,22 @@ export default Vue.extend({
     ScrollTableDemo,
   },
   data() {
+    // Читаем из URL при инициализации
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page');
+    const initialPage = page === 'scroll' ? 'scroll' : 'basic';
+    
     return {
-      activePage: 'basic' as 'basic' | 'scroll',
+      activePage: initialPage as 'basic' | 'scroll',
     };
+  },
+  watch: {
+    activePage(newPage: 'basic' | 'scroll') {
+      // Обновляем URL при изменении вкладки
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', newPage);
+      window.history.replaceState({}, '', url.toString());
+    },
   },
 });
 </script>

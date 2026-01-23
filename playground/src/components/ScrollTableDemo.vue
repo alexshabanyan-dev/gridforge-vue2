@@ -5,7 +5,12 @@
       Таблица визуально занимает 100% ширины родителя, но при этом появляется горизонтальный скролл,
       а ширина колонок берётся из <code>column.width</code>.
     </p>
-    <GridforgeTable :data="rows" :columns="columns" layout="scroll" />
+    <GridforgeTable
+      :data="rows"
+      :columns="columns"
+      layout="scroll"
+      @columns-change="onColumnsChange"
+    />
   </section>
 </template>
 
@@ -22,7 +27,13 @@ export default Vue.extend({
   data() {
     return {
       columns: [
-        { header: 'ID', field: 'id', columnKey: 'id', width: 60, minWidth: 50 },
+        {
+          header: 'ID',
+          field: 'id',
+          columnKey: 'id',
+          width: 60,
+          minWidth: 50,
+        },
         { header: 'Имя', field: 'name', columnKey: 'name', width: 200 },
         { header: 'Email', field: 'email', columnKey: 'email', width: 260 },
         { header: 'Возраст', field: 'age', columnKey: 'age', width: 100 },
@@ -35,7 +46,12 @@ export default Vue.extend({
         { header: 'Почтовый индекс', field: 'zip', columnKey: 'zip', width: 140 },
         { header: 'Статус', field: 'status', columnKey: 'status', width: 140 },
         { header: 'Создан', field: 'createdAt', columnKey: 'createdAt', width: 180 },
-        { header: 'Обновлен', field: 'updatedAt', columnKey: 'updatedAt', width: 180 },
+        {
+          header: 'Обновлен',
+          field: 'updatedAt',
+          columnKey: 'updatedAt',
+          width: 180,
+        },
       ] as TableColumn[],
       rows: [
         {
@@ -120,6 +136,18 @@ export default Vue.extend({
         },
       ] as TableRow[],
     };
+  },
+  methods: {
+    onColumnsChange(updatedColumns: TableColumn[]) {
+      // Создаем полностью новый массив с новыми объектами
+      this.columns = updatedColumns.map((col) => {
+        const newCol: TableColumn = { ...col };
+        if (col.alignFrozen) {
+          newCol.alignFrozen = col.alignFrozen;
+        }
+        return newCol;
+      });
+    },
   },
 });
 </script>

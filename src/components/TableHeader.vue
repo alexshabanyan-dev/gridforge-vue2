@@ -20,6 +20,7 @@
         @drop="onDrop"
         @drag-end="onDragEnd"
         @drag-leave="onDragLeave"
+        @context-menu="onContextMenu"
       />
     </tr>
   </thead>
@@ -83,6 +84,9 @@ export default Vue.extend({
     },
     onDragLeave(header: any, event: DragEvent) {
       this.$emit('drag-leave', header, event);
+    },
+    onContextMenu(header: any, event: MouseEvent) {
+      this.$emit('context-menu', header, event);
     },
   },
 });

@@ -1,5 +1,14 @@
 <template>
-  <td class="gf-table__body-cell" :style="cellStyle">
+  <td
+    class="gf-table__body-cell"
+    :class="{
+      'gf-table__body-cell--frozen-left': isFrozenLeft,
+      'gf-table__body-cell--frozen-right': isFrozenRight,
+      'gf-table__body-cell--frozen-left-border': isLastFrozenLeft,
+      'gf-table__body-cell--frozen-right-border': isFirstFrozenRight,
+    }"
+    :style="cellStyle"
+  >
     {{ cell.getValue() }}
   </td>
 </template>
@@ -35,6 +44,38 @@ export default Vue.extend({
   computed: {
     cellStyle(): Record<string, string> {
       return getCellStyle(this.cell, this.table, this.layout, this.visibleColumnCount);
+    },
+    isFrozenLeft(): boolean {
+      if (!this.cell.column) return false;
+      const meta = (this.cell.column.columnDef.meta as any) || {};
+      return meta.alignFrozen === 'left';
+    },
+    isFrozenRight(): boolean {
+      if (!this.cell.column) return false;
+      const meta = (this.cell.column.columnDef.meta as any) || {};
+      return meta.alignFrozen === 'right';
+    },
+    isLastFrozenLeft(): boolean {
+      if (!this.table || !this.isFrozenLeft) return false;
+      const allColumns = this.table.getAllLeafColumns();
+      const leftFrozen = allColumns.filter((col) => {
+        const meta = (col.columnDef.meta as any) || {};
+        return meta.alignFrozen === 'left';
+      });
+      if (leftFrozen.length === 0) return false;
+      const lastFrozen = leftFrozen[leftFrozen.length - 1];
+      return lastFrozen.id === this.cell.column.id;
+    },
+    isFirstFrozenRight(): boolean {
+      if (!this.table || !this.isFrozenRight) return false;
+      const allColumns = this.table.getAllLeafColumns();
+      const rightFrozen = allColumns.filter((col) => {
+        const meta = (col.columnDef.meta as any) || {};
+        return meta.alignFrozen === 'right';
+      });
+      if (rightFrozen.length === 0) return false;
+      const firstFrozen = rightFrozen[0];
+      return firstFrozen.id === this.cell.column.id;
     },
   },
 });

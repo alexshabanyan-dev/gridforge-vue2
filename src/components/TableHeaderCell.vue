@@ -6,6 +6,10 @@
       'gf-table__head-cell--draggable': canReorder,
       'gf-table__head-cell--dragging': isDragging,
       'gf-table__head-cell--drop-target': isDropTarget,
+      'gf-table__head-cell--frozen-left': isFrozenLeft,
+      'gf-table__head-cell--frozen-right': isFrozenRight,
+      'gf-table__head-cell--frozen-left-border': isLastFrozenLeft,
+      'gf-table__head-cell--frozen-right-border': isFirstFrozenRight,
     }"
     :style="headerStyle"
     :draggable="canReorder"
@@ -14,6 +18,7 @@
     @dragleave="onDragLeave"
     @drop.prevent="onDrop"
     @dragend="onDragEnd"
+    @contextmenu.prevent="onContextMenu"
   >
     <div class="gf-table__head-cell__content">
       <Icon
@@ -109,6 +114,38 @@ export default Vue.extend({
       const sizingInfo = this.table.getState().columnSizingInfo;
       return sizingInfo.isResizingColumn === this.header.column.id;
     },
+    isFrozenLeft(): boolean {
+      if (!this.header.column) return false;
+      const meta = (this.header.column.columnDef.meta as any) || {};
+      return meta.alignFrozen === 'left';
+    },
+    isFrozenRight(): boolean {
+      if (!this.header.column) return false;
+      const meta = (this.header.column.columnDef.meta as any) || {};
+      return meta.alignFrozen === 'right';
+    },
+    isLastFrozenLeft(): boolean {
+      if (!this.table || !this.isFrozenLeft) return false;
+      const allColumns = this.table.getAllLeafColumns();
+      const leftFrozen = allColumns.filter((col) => {
+        const meta = (col.columnDef.meta as any) || {};
+        return meta.alignFrozen === 'left';
+      });
+      if (leftFrozen.length === 0) return false;
+      const lastFrozen = leftFrozen[leftFrozen.length - 1];
+      return lastFrozen.id === this.header.column.id;
+    },
+    isFirstFrozenRight(): boolean {
+      if (!this.table || !this.isFrozenRight) return false;
+      const allColumns = this.table.getAllLeafColumns();
+      const rightFrozen = allColumns.filter((col) => {
+        const meta = (col.columnDef.meta as any) || {};
+        return meta.alignFrozen === 'right';
+      });
+      if (rightFrozen.length === 0) return false;
+      const firstFrozen = rightFrozen[0];
+      return firstFrozen.id === this.header.column.id;
+    },
   },
   methods: {
     onResizeStart(event: MouseEvent | TouchEvent) {
@@ -143,6 +180,11 @@ export default Vue.extend({
         return;
       }
       this.$emit('drag-leave', this.header, event);
+    },
+    onContextMenu(event: MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.$emit('context-menu', this.header, event);
     },
   },
 });

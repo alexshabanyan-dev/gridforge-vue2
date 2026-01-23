@@ -25,9 +25,7 @@ export interface TableColumn<T = TableRow> {
   reorderableColumn?: boolean;
   /** Можно ли скрывать колонку */
   canNotManipulate?: boolean;
-  /** Закреплена ли колонка (left/right) */
-  frozen?: boolean;
-  /** Выравнивание закрепленной колонки */
+  /** Выравнивание закрепленной колонки (left/right) */
   alignFrozen?: 'left' | 'right';
 }
 
