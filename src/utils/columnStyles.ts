@@ -136,7 +136,7 @@ export function getHeaderStyle(
     if (alignFrozen === 'left' || alignFrozen === 'right') {
       baseStyles.position = 'sticky';
       baseStyles.zIndex = '11';
-      baseStyles.backgroundColor = 'var(--gf-bg-header)';
+      baseStyles.backgroundColor = '#fafbfc'; // var(--gf-bg-header)
       if (alignFrozen === 'left') {
         const leftPos = calculateFrozenLeftPosition(header.column.id, table, layout);
         baseStyles.left = `${leftPos}px`;
@@ -193,7 +193,7 @@ export function getCellStyle(
     if (alignFrozen === 'left' || alignFrozen === 'right') {
       baseStyles.position = 'sticky';
       baseStyles.zIndex = '1';
-      baseStyles.backgroundColor = 'var(--gf-bg-base)';
+      baseStyles.backgroundColor = '#ffffff'; // var(--gf-bg-base)
       if (alignFrozen === 'left') {
         const leftPos = calculateFrozenLeftPosition(cell.column.id, table, layout);
         baseStyles.left = `${leftPos}px`;
