@@ -48,3 +48,4 @@ export default {
 ## Доступные иконки
 
 - `columns` - Иконка колонок (ColumnsSolid.svg)
+- `dragVertical` - Иконка для перетаскивания колонок (DragVerticalSolid.svg)

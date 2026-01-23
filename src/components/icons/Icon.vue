@@ -10,14 +10,13 @@
 import Vue from 'vue';
 // @ts-ignore - Vite поддерживает импорт SVG как строки через ?raw
 import columnsIconSvg from '../../assets/icons/ColumnsSolid.svg?raw';
+// @ts-ignore
+import dragVerticalIconSvg from '../../assets/icons/DragVerticalSolid.svg?raw';
 
 // Маппинг имен иконок на их SVG содержимое
 const iconMap: Record<string, string> = {
   columns: columnsIconSvg as string,
-  // Здесь можно добавить другие иконки по мере необходимости
-  // Например:
-  // import anotherIconSvg from '../../assets/icons/AnotherIcon.svg?raw';
-  // another: anotherIconSvg as string,
+  dragVertical: dragVerticalIconSvg as string,
 };
 
 export default Vue.extend({

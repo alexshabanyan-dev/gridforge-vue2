@@ -19,6 +19,7 @@
         @drag-over="onDragOver"
         @drop="onDrop"
         @drag-end="onDragEnd"
+        @drag-leave="onDragLeave"
       />
     </tr>
   </thead>
@@ -79,6 +80,9 @@ export default Vue.extend({
     },
     onDragEnd() {
       this.$emit('drag-end');
+    },
+    onDragLeave(header: any, event: DragEvent) {
+      this.$emit('drag-leave', header, event);
     },
   },
 });

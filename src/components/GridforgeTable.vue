@@ -1,10 +1,6 @@
 <template>
   <div :class="['gf-table', customClass]">
-    <ColumnMenu
-      :table="table"
-      :columns="leafColumns"
-      @visibility-change="onColumnVisibilityChange"
-    />
+    <TableBar :table="table" :columns="leafColumns" @visibility-change="onColumnVisibilityChange" />
     <div class="gf-table__wrapper">
       <table :class="tableClass">
         <TableHeader
@@ -18,6 +14,7 @@
           @drag-over="onHeaderDragOver"
           @drop="onHeaderDrop"
           @drag-end="onHeaderDragEnd"
+          @drag-leave="onHeaderDragLeave"
         />
         <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
       </table>
@@ -34,14 +31,14 @@ import type { GridforgeTableInstance } from '../tableCore';
 import { buildTable, initializeColumnSizing } from '../utils/tableBuilder';
 import { updateAutoMinSizes } from '../utils/columnMeasure';
 import { handleDragStart, handleDragOver, handleDrop } from '../utils/columnReorder';
-import ColumnMenu from './ColumnMenu.vue';
+import TableBar from './TableBar.vue';
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
 
 export default Vue.extend({
   name: 'GridforgeTable',
   components: {
-    ColumnMenu,
+    TableBar,
     TableHeader,
     TableBody,
   },
@@ -64,11 +61,6 @@ export default Vue.extend({
       type: String,
       default: undefined,
     },
-    /**
-     * Режим layout:
-     * - "fit"   — таблица растягивается до 100% ширины родителя
-     * - "scroll" — таблица может быть шире контейнера, появляется горизонтальный скролл
-     */
     layout: {
       type: String as PropType<'fit' | 'scroll'>,
       default: 'fit',
@@ -219,6 +211,15 @@ export default Vue.extend({
       // На случай, если drag завершился вне заголовков
       this.dragOverColumnId = null;
       this.draggedColumnId = null;
+    },
+    onHeaderDragLeave() {
+      // Если мы уводим курсор из области заголовков в пустое пространство,
+      // убираем визуальный индикатор drop-target
+      if (!this.draggedColumnId) return;
+      if (this.dragOverColumnId) {
+        this.dragOverColumnId = null;
+        this.$forceUpdate();
+      }
     },
     handleResizeEnd() {
       // Синхронизируем previousColumnSizing с текущим состоянием после окончания ресайза

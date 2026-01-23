@@ -11,10 +11,17 @@
     :draggable="canReorder"
     @dragstart="onDragStart"
     @dragover.prevent="onDragOver"
+    @dragleave="onDragLeave"
     @drop.prevent="onDrop"
     @dragend="onDragEnd"
   >
     <div class="gf-table__head-cell__content">
+      <Icon
+        v-if="canReorder"
+        name="dragVertical"
+        :size="14"
+        class="gf-table__head-cell__drag-icon"
+      />
       <span v-if="!header.isPlaceholder">
         {{ header.column.columnDef.header }}
       </span>
@@ -37,9 +44,13 @@ import type { TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { getHeaderStyle } from '../utils/columnStyles';
 import { canReorder as checkCanReorder } from '../utils/columnReorder';
+import Icon from './icons/Icon.vue';
 
 export default Vue.extend({
   name: 'TableHeaderCell',
+  components: {
+    Icon,
+  },
   props: {
     header: {
       type: Object as PropType<Header<TableRow, unknown>>,
@@ -122,6 +133,16 @@ export default Vue.extend({
     },
     onDragEnd() {
       this.$emit('drag-end');
+    },
+    onDragLeave(event: DragEvent) {
+      if (!this.canReorder) return;
+      const currentTarget = event.currentTarget as HTMLElement | null;
+      const relatedTarget = event.relatedTarget as HTMLElement | null;
+      // Игнорируем dragleave, если курсор всё ещё внутри той же ячейки
+      if (currentTarget && relatedTarget && currentTarget.contains(relatedTarget)) {
+        return;
+      }
+      this.$emit('drag-leave', this.header, event);
     },
   },
 });
