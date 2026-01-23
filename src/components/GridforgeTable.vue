@@ -16,6 +16,8 @@
           @drag-end="onHeaderDragEnd"
           @drag-leave="onHeaderDragLeave"
           @context-menu="onHeaderContextMenu"
+          :sort-by="effectiveSortBy"
+          @sort-toggle="onSortToggle"
         />
         <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
       </table>
@@ -53,7 +55,7 @@ import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
 import TableFooter from './TableFooter.vue';
 import ColumnContextMenu from './ColumnContextMenu.vue';
-import type { PaginationWithTotal, PaginationWithFlags } from '../types';
+import type { PaginationWithTotal, PaginationWithFlags, SortState } from '../types';
 
 export default Vue.extend({
   name: 'GridforgeTable',
@@ -103,6 +105,10 @@ export default Vue.extend({
       type: Object as PropType<PaginationWithFlags | undefined>,
       default: undefined,
     },
+    sortBy: {
+      type: Array as PropType<SortState[]>,
+      default: undefined,
+    },
   },
   data() {
     return {
@@ -138,6 +144,9 @@ export default Vue.extend({
     },
     currentPageSize(): number {
       return this.pageSize;
+    },
+    effectiveSortBy(): SortState[] {
+      return this.sortBy ?? [];
     },
     orderedColumns(): TableColumn[] {
       const leftFrozen: TableColumn[] = [];
@@ -418,6 +427,30 @@ export default Vue.extend({
     onPageChange(page: number | 'previous' | 'next') {
       // Эмитим событие для изменения страницы
       this.$emit('page-change', page);
+    },
+    onSortToggle(columnId: string) {
+      const currentSort = this.effectiveSortBy;
+      const existingIndex = currentSort.findIndex((sort) => sort.id === columnId);
+
+      let nextSort: SortState[];
+
+      if (existingIndex === -1) {
+        // Колонка не в сортировке - добавляем ASC
+        nextSort = [...currentSort, { id: columnId, desc: false }];
+      } else {
+        const existing = currentSort[existingIndex];
+        if (!existing.desc) {
+          // ASC -> DESC
+          nextSort = [...currentSort];
+          nextSort[existingIndex] = { id: columnId, desc: true };
+        } else {
+          // DESC -> None (удаляем из массива)
+          nextSort = currentSort.filter((_, index) => index !== existingIndex);
+        }
+      }
+
+      // Эмитим событие, но не меняем локально - ждем обновления пропса
+      this.$emit('sort-change', nextSort);
     },
   },
 });

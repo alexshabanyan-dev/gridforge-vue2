@@ -14,6 +14,7 @@
         :visible-column-count="visibleColumnCount"
         :dragged-column-id="draggedColumnId"
         :drag-over-column-id="dragOverColumnId"
+        :sort-by="sortBy"
         @resize-start="onResizeStart"
         @drag-start="onDragStart"
         @drag-over="onDragOver"
@@ -21,6 +22,7 @@
         @drag-end="onDragEnd"
         @drag-leave="onDragLeave"
         @context-menu="onContextMenu"
+        @sort-toggle="onSortToggle"
       />
     </tr>
   </thead>
@@ -30,6 +32,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { GridforgeTableInstance } from '../tableCore';
+import type { SortState } from '../types';
 import TableHeaderCell from './TableHeaderCell.vue';
 import { canReorder } from '../utils/columnReorder';
 
@@ -59,6 +62,10 @@ export default Vue.extend({
       type: String,
       default: null,
     },
+    sortBy: {
+      type: Array as PropType<SortState[]>,
+      default: () => [],
+    },
   },
   computed: {
     headerGroups() {
@@ -87,6 +94,9 @@ export default Vue.extend({
     },
     onContextMenu(header: any, event: MouseEvent) {
       this.$emit('context-menu', header, event);
+    },
+    onSortToggle(columnId: string) {
+      this.$emit('sort-toggle', columnId);
     },
   },
 });

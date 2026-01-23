@@ -33,9 +33,10 @@ export function toColumnDefs(columns: TableColumn[]): ColumnDef<TableRow, unknow
       minSize,
       maxSize,
       enableResizing: col.resizable !== false,
-      // Сохраняем alignFrozen в meta для доступа из компонентов
+      // Сохраняем alignFrozen и sortable в meta для доступа из компонентов
       meta: {
         alignFrozen: col.alignFrozen,
+        sortable: col.sortable === true, // По умолчанию false, нужно явно указать true
       },
     };
 

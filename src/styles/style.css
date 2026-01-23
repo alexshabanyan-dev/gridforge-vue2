@@ -525,6 +525,65 @@
   display: flex;
   align-items: center;
   gap: var(--gf-spacing-sm);
+  width: 100%;
+}
+
+.gf-table__head-cell__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gf-table__head-cell__sort-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gf-spacing-xs);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--gf-radius-sm);
+  transition: all var(--gf-transition-base) var(--gf-ease-out);
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+.gf-table__head-cell__sort-button:hover {
+  background-color: var(--gf-bg-hover);
+  opacity: 1;
+}
+
+.gf-table__head-cell__sort-button:focus {
+  outline: none;
+}
+
+.gf-table__head-cell__sort-button:active {
+  transform: scale(0.95);
+}
+
+.gf-table__head-cell__sort-icon {
+  color: var(--gf-text-tertiary);
+  transition: color var(--gf-transition-base) var(--gf-ease-out);
+}
+
+.gf-table__head-cell__sort-button:hover .gf-table__head-cell__sort-icon {
+  color: var(--gf-color-primary);
+}
+
+/* Активное состояние сортировки */
+.gf-table__head-cell__sort-button--active {
+  opacity: 1;
+}
+
+.gf-table__head-cell__sort-button--active .gf-table__head-cell__sort-icon {
+  color: var(--gf-color-primary);
+}
+
+.gf-table__head-cell__sort-icon--asc,
+.gf-table__head-cell__sort-icon--desc {
+  color: var(--gf-color-primary);
 }
 
 .gf-table__head-cell--draggable {

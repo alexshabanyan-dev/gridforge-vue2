@@ -27,9 +27,28 @@
         :size="14"
         class="gf-table__head-cell__drag-icon"
       />
-      <span v-if="!header.isPlaceholder">
+      <span v-if="!header.isPlaceholder" class="gf-table__head-cell__title">
         {{ header.column.columnDef.header }}
       </span>
+      <button
+        v-if="!header.isPlaceholder && isSortable"
+        class="gf-table__head-cell__sort-button"
+        :class="{
+          'gf-table__head-cell__sort-button--active': currentSortState,
+        }"
+        @click.stop="onSortClick"
+        type="button"
+      >
+        <Icon
+          :name="sortIconName"
+          :size="14"
+          class="gf-table__head-cell__sort-icon"
+          :class="{
+            'gf-table__head-cell__sort-icon--asc': currentSortState && !currentSortState.desc,
+            'gf-table__head-cell__sort-icon--desc': currentSortState && currentSortState.desc,
+          }"
+        />
+      </button>
     </div>
     <div
       v-if="header.column.getCanResize && header.column.getCanResize()"
@@ -45,7 +64,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Header } from '@tanstack/table-core';
-import type { TableRow } from '../types';
+import type { TableRow, SortState } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { getHeaderStyle } from '../utils/columnStyles';
 import { canReorder as checkCanReorder } from '../utils/columnReorder';
@@ -80,6 +99,10 @@ export default Vue.extend({
     dragOverColumnId: {
       type: String,
       default: null,
+    },
+    sortBy: {
+      type: Array as PropType<SortState[]>,
+      default: () => [],
     },
   },
   computed: {
@@ -146,6 +169,21 @@ export default Vue.extend({
       const firstFrozen = rightFrozen[0];
       return firstFrozen.id === this.header.column.id;
     },
+    currentSortState(): SortState | undefined {
+      if (!this.header.column) return undefined;
+      const columnId = this.header.column.id as string;
+      return this.sortBy.find((sort) => sort.id === columnId);
+    },
+    sortIconName(): string {
+      const sortState = this.currentSortState;
+      if (!sortState) return 'sort';
+      return sortState.desc ? 'sortDesc' : 'sortAsc';
+    },
+    isSortable(): boolean {
+      if (!this.header.column) return false;
+      const meta = (this.header.column.columnDef.meta as any) || {};
+      return meta.sortable === true; // По умолчанию false, нужно явно указать true
+    },
   },
   methods: {
     onResizeStart(event: MouseEvent | TouchEvent) {
@@ -185,6 +223,11 @@ export default Vue.extend({
       event.preventDefault();
       event.stopPropagation();
       this.$emit('context-menu', this.header, event);
+    },
+    onSortClick() {
+      if (!this.header.column) return;
+      const columnId = this.header.column.id as string;
+      this.$emit('sort-toggle', columnId);
     },
   },
 });

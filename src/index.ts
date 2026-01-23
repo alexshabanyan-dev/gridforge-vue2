@@ -12,6 +12,8 @@ export type {
   GridforgeTableProps,
   PaginationWithTotal,
   PaginationWithFlags,
+  SortState,
+  SortDirection,
 } from './types';
 
 // Plugin installation for Vue 2

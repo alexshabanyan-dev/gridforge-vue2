@@ -12,11 +12,20 @@ import Vue from 'vue';
 import columnsIconSvg from '../../assets/icons/ColumnsSolid.svg?raw';
 // @ts-ignore
 import dragVerticalIconSvg from '../../assets/icons/DragVerticalSolid.svg?raw';
+// @ts-ignore
+import sortIconSvg from '../../assets/icons/Sort.svg?raw';
+// @ts-ignore
+import sortAscendingIconSvg from '../../assets/icons/SortAscending.svg?raw';
+// @ts-ignore
+import sortDescendingIconSvg from '../../assets/icons/SortDescending.svg?raw';
 
 // Маппинг имен иконок на их SVG содержимое
 const iconMap: Record<string, string> = {
   columns: columnsIconSvg as string,
   dragVertical: dragVerticalIconSvg as string,
+  sort: sortIconSvg as string,
+  sortAsc: sortAscendingIconSvg as string,
+  sortDesc: sortDescendingIconSvg as string,
 };
 
 export default Vue.extend({
@@ -59,18 +68,49 @@ export default Vue.extend({
         .replace(/width="\d+"/g, `width="${this.size}"`)
         .replace(/height="\d+"/g, `height="${this.size}"`);
 
+      // Для иконок сортировки с stroke уменьшаем stroke-width пропорционально размеру
+      const strokeSortIcons = ['sortAsc', 'sortDesc'];
+      if (strokeSortIcons.includes(this.name)) {
+        // stroke-width="2" для размера 24px, для меньших размеров уменьшаем пропорционально
+        const baseSize = 24;
+        const baseStrokeWidth = 2;
+        const strokeWidth = Math.max(1, (this.size / baseSize) * baseStrokeWidth);
+        if (content.includes('stroke-width=')) {
+          content = content.replace(/stroke-width="[^"]*"/g, `stroke-width="${strokeWidth}"`);
+        } else {
+          // Добавляем stroke-width к path элементам
+          content = content.replace(/<path/g, `<path stroke-width="${strokeWidth}"`);
+        }
+      }
+      
+      // Для всех иконок сортировки добавляем preserveAspectRatio для правильного масштабирования
+      const sortIcons = ['sort', 'sortAsc', 'sortDesc'];
+      if (sortIcons.includes(this.name) && !content.includes('preserveAspectRatio=')) {
+        if (content.includes('viewBox=')) {
+          content = content.replace(
+            /(<svg[^>]*viewBox="[^"]*")/,
+            `$1 preserveAspectRatio="xMidYMid meet"`,
+          );
+        } else {
+          // Если нет viewBox, добавляем его вместе с preserveAspectRatio
+          const viewBox = this.name === 'sort' ? '0 0 1024 1408' : '0 0 24 24';
+          content = content.replace(
+            /(<svg[^>]*xmlns="[^"]*")/,
+            `$1 viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet"`,
+          );
+        }
+      }
+
       // Если нужно, заменяем fill на currentColor для поддержки color prop
       if (this.color !== 'currentColor') {
         content = content.replace(/fill="[^"]*"/g, `fill="${this.color}"`);
       } else {
-        // Убеждаемся, что fill="currentColor" установлен
-        if (!content.includes('fill=')) {
-          // Если нет fill, добавляем к path
-          content = content.replace(/<path/g, '<path fill="currentColor"');
-        } else {
-          // Заменяем существующий fill на currentColor
+        // Для иконок с fill (не stroke) убеждаемся, что fill="currentColor"
+        if (this.name === 'sort') {
+          // Иконка Sort использует fill, заменяем на currentColor
           content = content.replace(/fill="[^"]*"/g, 'fill="currentColor"');
         }
+        // Для иконок с stroke (sortAsc, sortDesc) не трогаем fill, так как они используют stroke
       }
 
       return content;

@@ -44,6 +44,18 @@
                 Пагинация без count
               </button>
             </div>
+
+            <!-- Раздел: Сортировка -->
+            <div class="sidebar-nav__section">
+              <div class="sidebar-nav__section-title">Сортировка</div>
+              <button
+                class="sidebar-nav__item sidebar-nav__item--sub"
+                :class="{ 'sidebar-nav__item--active': activeSection === 'sorting' && activePage === 'sorting' }"
+                @click="setActivePage('sorting', 'sorting')"
+              >
+                Server-side сортировка
+              </button>
+            </div>
           </nav>
         </aside>
 
@@ -52,6 +64,7 @@
           <ScrollTableDemo v-else-if="activePage === 'scroll'" />
           <PaginationTableDemo v-else-if="activePage === 'pagination-with-count'" />
           <PaginationWithoutCountDemo v-else-if="activePage === 'pagination-without-count'" />
+          <SortingDemo v-else-if="activePage === 'sorting'" />
         </main>
       </div>
     </div>
@@ -64,6 +77,7 @@ import BasicTableDemo from './components/BasicTableDemo.vue';
 import ScrollTableDemo from './components/ScrollTableDemo.vue';
 import PaginationTableDemo from './components/PaginationTableDemo.vue';
 import PaginationWithoutCountDemo from './components/PaginationWithoutCountDemo.vue';
+import SortingDemo from './components/SortingDemo.vue';
 
 export default Vue.extend({
   name: 'App',
@@ -72,6 +86,7 @@ export default Vue.extend({
     ScrollTableDemo,
     PaginationTableDemo,
     PaginationWithoutCountDemo,
+    SortingDemo,
   },
   data() {
     // Читаем из URL при инициализации
@@ -83,6 +98,7 @@ export default Vue.extend({
     const validCombinations: Record<string, string[]> = {
       basic: ['basic', 'scroll'],
       pagination: ['pagination-with-count', 'pagination-without-count'],
+      sorting: ['sorting'],
     };
     
     const validSection = validCombinations[section] ? section : 'basic';
@@ -91,8 +107,8 @@ export default Vue.extend({
       : validCombinations[validSection][0];
     
     return {
-      activeSection: validSection as 'basic' | 'pagination',
-      activePage: validPage as 'basic' | 'scroll' | 'pagination-with-count' | 'pagination-without-count',
+      activeSection: validSection as 'basic' | 'pagination' | 'sorting',
+      activePage: validPage as 'basic' | 'scroll' | 'pagination-with-count' | 'pagination-without-count' | 'sorting',
     };
   },
   watch: {
@@ -104,7 +120,7 @@ export default Vue.extend({
     },
   },
   methods: {
-    setActivePage(section: 'basic' | 'pagination', page: string) {
+    setActivePage(section: 'basic' | 'pagination' | 'sorting', page: string) {
       this.activeSection = section;
       this.activePage = page as any;
     },

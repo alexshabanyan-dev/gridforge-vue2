@@ -27,6 +27,23 @@ export interface TableColumn<T = TableRow> {
   canNotManipulate?: boolean;
   /** Выравнивание закрепленной колонки (left/right) */
   alignFrozen?: 'left' | 'right';
+  /** Можно ли сортировать колонку (по умолчанию false, нужно явно указать true) */
+  sortable?: boolean;
+}
+
+/**
+ * Направление сортировки
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * Состояние сортировки для одной колонки
+ */
+export interface SortState {
+  /** ID колонки (columnKey или field) */
+  id: string;
+  /** Направление сортировки: false = ASC, true = DESC */
+  desc: boolean;
 }
 
 /**
@@ -73,4 +90,6 @@ export interface GridforgeTableProps<T = TableRow> {
   pagination?: PaginationWithTotal;
   /** Пагинация без известного общего количества (используется isFirst/isLast) */
   paginationFlags?: PaginationWithFlags;
+  /** Текущее состояние сортировки (controlled) */
+  sortBy?: SortState[];
 }
