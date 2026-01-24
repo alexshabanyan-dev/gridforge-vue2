@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['floating-vue'],
+    include: ['floating-vue', '@iconify/vue2'],
     esbuildOptions: {
       target: 'es2015',
     },

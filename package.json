@@ -41,8 +41,8 @@
   "author": "Alexander",
   "license": "MIT",
   "peerDependencies": {
-    "vue": "^2.7.8",
-    "floating-vue": "^1.0.0"
+    "floating-vue": "^1.0.0",
+    "vue": "^2.7.8"
   },
   "peerDependenciesMeta": {
     "vue": {
@@ -66,7 +66,8 @@
     "vue-tsc": "^2.0.29"
   },
   "dependencies": {
+    "@iconify/vue2": "^2.1.0",
     "@tanstack/table-core": "^8.20.0",
-    "floating-vue": "vue2"
+    "floating-vue": "^1.0.0"
   }
 }

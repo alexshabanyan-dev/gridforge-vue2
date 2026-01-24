@@ -1,51 +1,55 @@
 # Иконки
 
-Универсальный компонент `Icon` для отображения SVG иконок в библиотеке.
+Компонент `Icon` — обёртка над [@iconify/vue2](https://iconify.design/docs/icon-components/vue2/). Иконки из набора **Lucide** подгружаются по требованию через Iconify API.
 
 ## Использование
 
 ```vue
 <template>
-  <Icon name="columns" :size="16" color="currentColor" />
+  <Icon
+    name="columns"
+    :size="16"
+    color="currentColor"
+  />
 </template>
 
 <script>
 import Icon from '@/components/icons/Icon.vue';
 
 export default {
-  components: {
-    Icon,
-  },
+  components: { Icon },
 };
 </script>
 ```
 
 ## Props
 
-- `name` (required, string) - Имя иконки из доступного списка
-- `size` (optional, number, default: 16) - Размер иконки в пикселях
-- `color` (optional, string, default: 'currentColor') - Цвет иконки
-
-## Добавление новых иконок
-
-1. Добавьте SVG файл в `src/assets/icons/`
-2. Импортируйте его в `src/components/icons/Icon.vue`:
-   ```typescript
-   import newIconSvg from '../../assets/icons/NewIcon.svg?raw';
-   ```
-3. Добавьте запись в `iconMap`:
-   ```typescript
-   const iconMap: Record<string, string> = {
-     columns: columnsIconSvg as string,
-     newIcon: newIconSvg as string, // новая иконка
-   };
-   ```
-4. Используйте в компонентах:
-   ```vue
-   <Icon name="newIcon" :size="20" />
-   ```
+- `name` (required, string) — имя из списка ниже
+- `size` (optional, number, default: 16) — размер в px
+- `color` (optional, string, default: `'currentColor'`) — цвет
 
 ## Доступные иконки
 
-- `columns` - Иконка колонок (ColumnsSolid.svg)
-- `dragVertical` - Иконка для перетаскивания колонок (DragVerticalSolid.svg)
+| name             | Iconify (Lucide)    |
+|------------------|---------------------|
+| `columns`        | lucide:columns-2    |
+| `dragVertical`   | lucide:grip-vertical|
+| `sort`           | lucide:arrow-up-down|
+| `sortAsc`        | lucide:arrow-up     |
+| `sortDesc`       | lucide:arrow-down   |
+| `ellipsisVertical` | lucide:ellipsis-vertical |
+
+## Добавление новых иконок
+
+1. Выберите иконку на [Iconify](https://icon-sets.iconify.design/) (например, Lucide).
+2. В `Icon.vue` добавьте запись в `NAME_TO_ICON`:
+
+   ```ts
+   const NAME_TO_ICON: Record<string, string> = {
+     // ...
+     myIcon: 'lucide:my-icon-name',
+   };
+   ```
+
+3. Добавьте `myIcon` в `validator` (через `Object.keys(NAME_TO_ICON)` он уже учитывается).
+4. Используйте: `<Icon name="myIcon" :size="20" />`.
