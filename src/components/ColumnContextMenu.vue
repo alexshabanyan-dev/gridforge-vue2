@@ -81,12 +81,20 @@ export default Vue.extend({
         this.$nextTick(() => {
           setTimeout(() => {
             document.addEventListener('click', this.handleClickOutside, true);
-            document.addEventListener('contextmenu', this.handleClickOutside, true);
+            document.addEventListener(
+              'contextmenu',
+              this.handleClickOutside,
+              true,
+            );
           }, 50);
         });
       } else {
         document.removeEventListener('click', this.handleClickOutside, true);
-        document.removeEventListener('contextmenu', this.handleClickOutside, true);
+        document.removeEventListener(
+          'contextmenu',
+          this.handleClickOutside,
+          true,
+        );
       }
     },
   },

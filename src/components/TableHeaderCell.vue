@@ -27,7 +27,10 @@
         :size="14"
         class="gf-table__head-cell__drag-icon"
       />
-      <span v-if="!header.isPlaceholder" class="gf-table__head-cell__title">
+      <span
+        v-if="!header.isPlaceholder"
+        class="gf-table__head-cell__title"
+      >
         {{ header.column.columnDef.header }}
       </span>
       <button
@@ -182,8 +185,12 @@ export default Vue.extend({
     sortIconClass(): Record<string, boolean> {
       const sortState = this.currentSortState;
       return {
-        'gf-table__head-cell__sort-icon--asc': Boolean(sortState && !sortState.desc),
-        'gf-table__head-cell__sort-icon--desc': Boolean(sortState && sortState.desc),
+        'gf-table__head-cell__sort-icon--asc': Boolean(
+          sortState && !sortState.desc,
+        ),
+        'gf-table__head-cell__sort-icon--desc': Boolean(
+          sortState && sortState.desc,
+        ),
       };
     },
     isSortable(): boolean {
@@ -192,7 +199,11 @@ export default Vue.extend({
   },
   methods: {
     onResizeStart(event: MouseEvent | TouchEvent) {
-      if (!this.header.column.getCanResize || !this.header.column.getCanResize()) return;
+      if (
+        !this.header.column.getCanResize ||
+        !this.header.column.getCanResize()
+      )
+        return;
       const handler = this.header.getResizeHandler?.();
       if (handler) {
         handler(event);
@@ -219,7 +230,11 @@ export default Vue.extend({
       const currentTarget = event.currentTarget as HTMLElement | null;
       const relatedTarget = event.relatedTarget as HTMLElement | null;
       // Игнорируем dragleave, если курсор всё ещё внутри той же ячейки
-      if (currentTarget && relatedTarget && currentTarget.contains(relatedTarget)) {
+      if (
+        currentTarget &&
+        relatedTarget &&
+        currentTarget.contains(relatedTarget)
+      ) {
         return;
       }
       this.$emit('drag-leave', this.header, event);

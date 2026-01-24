@@ -29,12 +29,12 @@ export function useColumnResize(props: UseColumnResizeProps) {
     if (!props.column) {
       return typeof props.column?.width === 'number' ? props.column.width : 150;
     }
-    
+
     // Если есть текущая ширина (во время resize), используем её
     if (currentWidth.value !== null) {
       return currentWidth.value;
     }
-    
+
     const key = columnKey.value;
     // Если есть сохраненная ширина в columnSizing
     // Явно обращаемся к .value для правильного отслеживания в Vue 2
@@ -44,7 +44,7 @@ export function useColumnResize(props: UseColumnResizeProps) {
         return sizing[key];
       }
     }
-    
+
     // Иначе используем width из column или дефолт
     if (typeof props.column.width === 'number') {
       return props.column.width;
@@ -141,7 +141,7 @@ export function useColumnResize(props: UseColumnResizeProps) {
         // Сохраняем финальное значение перед сбросом
         const finalWidth = currentWidth.value;
         const key = columnKey.value;
-        
+
         // Убеждаемся, что финальное значение сохранено в columnSizing
         // Значение уже должно быть сохранено в handleMouseMove, но сохраняем еще раз для надежности
         if (props.columnSizing && finalWidth !== null) {
@@ -166,9 +166,15 @@ export function useColumnResize(props: UseColumnResizeProps) {
         document.body.style.userSelect = '';
 
         // Удаляем обработчики
-        document.removeEventListener('mousemove', handleMouseMove as EventListener);
+        document.removeEventListener(
+          'mousemove',
+          handleMouseMove as EventListener,
+        );
         document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('touchmove', handleMouseMove as EventListener);
+        document.removeEventListener(
+          'touchmove',
+          handleMouseMove as EventListener,
+        );
         document.removeEventListener('touchend', handleMouseUp);
       }
     };

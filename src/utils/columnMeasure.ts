@@ -1,4 +1,5 @@
-import type { TableColumn } from '../types';
+import type { ColumnDef } from '@tanstack/table-core';
+import type { TableColumn, TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { HEADER_PADDING, RESIZER_SPACE } from '../constants/tableConstants';
 
@@ -14,8 +15,10 @@ export function measureTextWidth(
   measureEl.style.visibility = 'hidden';
   measureEl.style.whiteSpace = 'nowrap';
   measureEl.style.fontSize = window.getComputedStyle(referenceElement).fontSize;
-  measureEl.style.fontWeight = window.getComputedStyle(referenceElement).fontWeight;
-  measureEl.style.fontFamily = window.getComputedStyle(referenceElement).fontFamily;
+  measureEl.style.fontWeight =
+    window.getComputedStyle(referenceElement).fontWeight;
+  measureEl.style.fontFamily =
+    window.getComputedStyle(referenceElement).fontFamily;
   measureEl.textContent = text;
   document.body.appendChild(measureEl);
   const width = measureEl.offsetWidth;
@@ -89,7 +92,9 @@ export function updateAutoMinSizes(
     }
 
     // Измеряем ширину содержимого заголовка
-    const content = cell.querySelector('.gf-table__head-cell__content') as HTMLElement;
+    const content = cell.querySelector(
+      '.gf-table__head-cell__content',
+    ) as HTMLElement;
     if (!content) return;
 
     const headerText = (column.columnDef.header as string) || columnId;
@@ -99,10 +104,11 @@ export function updateAutoMinSizes(
       column.getCanResize() || false,
     );
 
-    // Обновляем minSize в columnDef напрямую (это влияет на getSize() и ограничения ресайза)
-    const currentMinSize = (column.columnDef as any).minSize || 0;
+    // Обновляем minSize в columnDef напрямую (влияет на getSize и ресайз)
+    const def = column.columnDef as ColumnDef<TableRow, unknown>;
+    const currentMinSize = def.minSize || 0;
     if (autoMinWidth > currentMinSize) {
-      (column.columnDef as any).minSize = autoMinWidth;
+      def.minSize = autoMinWidth;
       hasChanges = true;
     }
 

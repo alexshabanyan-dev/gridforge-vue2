@@ -8,15 +8,15 @@
 
 <script lang="ts">
 import Vue from 'vue';
-// @ts-ignore - Vite поддерживает импорт SVG как строки через ?raw
+// @ts-expect-error Vite импортирует SVG как строку через ?raw
 import columnsIconSvg from '../../assets/icons/ColumnsSolid.svg?raw';
-// @ts-ignore
+// @ts-expect-error Vite ?raw
 import dragVerticalIconSvg from '../../assets/icons/DragVerticalSolid.svg?raw';
-// @ts-ignore
+// @ts-expect-error Vite ?raw
 import sortIconSvg from '../../assets/icons/Sort.svg?raw';
-// @ts-ignore
+// @ts-expect-error Vite ?raw
 import sortAscendingIconSvg from '../../assets/icons/SortAscending.svg?raw';
-// @ts-ignore
+// @ts-expect-error Vite ?raw
 import sortDescendingIconSvg from '../../assets/icons/SortDescending.svg?raw';
 
 // Маппинг имен иконок на их SVG содержимое
@@ -31,6 +31,8 @@ const iconMap: Record<string, string> = {
 // Константы для иконок сортировки (вынесены для оптимизации)
 const STROKE_SORT_ICONS = ['sortAsc', 'sortDesc'] as const;
 const ALL_SORT_ICONS = ['sort', 'sortAsc', 'sortDesc'] as const;
+type SortIconName = (typeof ALL_SORT_ICONS)[number];
+type StrokeSortIconName = (typeof STROKE_SORT_ICONS)[number];
 
 export default Vue.extend({
   name: 'Icon',
@@ -76,21 +78,33 @@ export default Vue.extend({
         .replace(/height="\d+"/g, `height="${this.size}"`);
 
       // Для иконок сортировки с stroke уменьшаем stroke-width пропорционально размеру
-      if (STROKE_SORT_ICONS.includes(this.name as any)) {
+      if (STROKE_SORT_ICONS.includes(this.name as StrokeSortIconName)) {
         // stroke-width="2" для размера 24px, для меньших размеров уменьшаем пропорционально
         const baseSize = 24;
         const baseStrokeWidth = 2;
-        const strokeWidth = Math.max(1, (this.size / baseSize) * baseStrokeWidth);
+        const strokeWidth = Math.max(
+          1,
+          (this.size / baseSize) * baseStrokeWidth,
+        );
         if (content.includes('stroke-width=')) {
-          content = content.replace(/stroke-width="[^"]*"/g, `stroke-width="${strokeWidth}"`);
+          content = content.replace(
+            /stroke-width="[^"]*"/g,
+            `stroke-width="${strokeWidth}"`,
+          );
         } else {
           // Добавляем stroke-width к path элементам
-          content = content.replace(/<path/g, `<path stroke-width="${strokeWidth}"`);
+          content = content.replace(
+            /<path/g,
+            `<path stroke-width="${strokeWidth}"`,
+          );
         }
       }
-      
-      // Для всех иконок сортировки добавляем preserveAspectRatio для правильного масштабирования
-      if (ALL_SORT_ICONS.includes(this.name as any) && !content.includes('preserveAspectRatio=')) {
+
+      // Для всех иконок сортировки добавляем preserveAspectRatio
+      if (
+        ALL_SORT_ICONS.includes(this.name as SortIconName) &&
+        !content.includes('preserveAspectRatio=')
+      ) {
         if (content.includes('viewBox=')) {
           content = content.replace(
             /(<svg[^>]*viewBox="[^"]*")/,

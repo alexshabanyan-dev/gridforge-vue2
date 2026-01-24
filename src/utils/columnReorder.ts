@@ -14,13 +14,13 @@ function getColumnMeta(columnDef: { meta?: unknown }): ColumnMeta {
  */
 export function canReorder(header: Header<TableRow, unknown>): boolean {
   if (!header.column || header.isPlaceholder) return false;
-  
+
   // Закрепленные колонки нельзя перетаскивать
   const meta = getColumnMeta(header.column.columnDef);
   if (meta.alignFrozen === 'left' || meta.alignFrozen === 'right') {
     return false;
   }
-  
+
   return true;
 }
 

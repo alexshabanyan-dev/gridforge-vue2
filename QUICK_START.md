@@ -53,8 +53,9 @@ npm run build
 ```
 
 Результат будет в папке `dist/`:
+
 - `gridforge-vue2.es.js` - ES модуль
-- `gridforge-vue2.umd.js` - UMD модуль  
+- `gridforge-vue2.umd.js` - UMD модуль
 - `style.css` - стили
 - `index.d.ts` - TypeScript типы
 

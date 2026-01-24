@@ -5,17 +5,36 @@
       'gf-table__footer--with-total': pagination,
     }"
   >
-    <!-- Режим с totalElements: слева текст, по центру пагинация, справа pageSizeChanger -->
+    <!-- Режим с totalElements:
+         слева текст,
+         по центру пагинация,
+         справа pageSizeChanger -->
     <template v-if="pagination">
-      <div class="gf-table__footer-total">Найдено записей — {{ pagination.totalElements }}</div>
-      <Pagination :pagination="pagination" @page-change="onPageChange" />
-      <PageSizeSelector :value="pageSize" :options="pageSizeOptions" @change="onPageSizeChange" />
+      <div class="gf-table__footer-total">
+        Найдено записей — {{ pagination.totalElements }}
+      </div>
+      <Pagination
+        :pagination="pagination"
+        @page-change="onPageChange"
+      />
+      <PageSizeSelector
+        :value="pageSize"
+        :options="pageSizeOptions"
+        @change="onPageSizeChange"
+      />
     </template>
 
     <!-- Режим без totalElements: слева pageSizeChanger, справа пагинация -->
     <template v-else>
-      <PageSizeSelector :value="pageSize" :options="pageSizeOptions" @change="onPageSizeChange" />
-      <Pagination :pagination-flags="paginationFlags" @page-change="onPageChange" />
+      <PageSizeSelector
+        :value="pageSize"
+        :options="pageSizeOptions"
+        @change="onPageSizeChange"
+      />
+      <Pagination
+        :pagination-flags="paginationFlags"
+        @page-change="onPageChange"
+      />
     </template>
   </div>
 </template>

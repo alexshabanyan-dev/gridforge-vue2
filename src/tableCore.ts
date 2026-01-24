@@ -15,7 +15,9 @@ type MutableTable<TData> = Table<TData> & {
   options: TableOptionsResolved<TData>;
 };
 
-export function toColumnDefs(columns: TableColumn[]): ColumnDef<TableRow, unknown>[] {
+export function toColumnDefs(
+  columns: TableColumn[],
+): ColumnDef<TableRow, unknown>[] {
   return (columns || []).map((col) => {
     const id = String(col.columnKey || col.field);
 

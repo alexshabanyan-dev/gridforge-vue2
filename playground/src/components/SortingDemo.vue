@@ -2,9 +2,9 @@
   <section class="section">
     <h2>Сортировка (server-side)</h2>
     <p class="section__description">
-      Пример использования server-side сортировки с мультисортировкой. Клик по иконке сортировки
-      переключает состояние: None → ASC → DESC → None. Можно сортировать по нескольким колонкам
-      одновременно.
+      Пример использования server-side сортировки с мультисортировкой. Клик по
+      иконке сортировки переключает состояние: None → ASC → DESC → None. Можно
+      сортировать по нескольким колонкам одновременно.
     </p>
     <GridforgeTable
       :data="rows"
@@ -23,7 +23,9 @@
       "
     >
       <strong>Текущая сортировка:</strong>
-      <pre style="margin: 8px 0 0 0; font-size: 12px">{{ JSON.stringify(sortBy, null, 2) }}</pre>
+      <pre style="margin: 8px 0 0 0; font-size: 12px">{{
+        JSON.stringify(sortBy, null, 2)
+      }}</pre>
     </div>
   </section>
 </template>
@@ -44,10 +46,22 @@ export default Vue.extend({
       sortBy: [{ id: 'name', desc: false }] as SortState[],
       columns: [
         { header: 'ID', field: 'id', columnKey: 'id', width: 60 },
-        { header: 'Имя', field: 'name', columnKey: 'name', width: 200, sortable: true },
+        {
+          header: 'Имя',
+          field: 'name',
+          columnKey: 'name',
+          width: 200,
+          sortable: true,
+        },
         { header: 'Email', field: 'email', columnKey: 'email', width: 260 },
         { header: 'Возраст', field: 'age', columnKey: 'age', width: 100 },
-        { header: 'Город', field: 'city', columnKey: 'city', width: 160, sortable: true },
+        {
+          header: 'Город',
+          field: 'city',
+          columnKey: 'city',
+          width: 160,
+          sortable: true,
+        },
         {
           header: 'Профессия',
           field: 'jobTitle',
@@ -55,8 +69,20 @@ export default Vue.extend({
           width: 220,
           sortable: true,
         },
-        { header: 'Компания', field: 'company', columnKey: 'company', width: 180, sortable: true },
-        { header: 'Статус', field: 'status', columnKey: 'status', width: 140, sortable: true },
+        {
+          header: 'Компания',
+          field: 'company',
+          columnKey: 'company',
+          width: 180,
+          sortable: true,
+        },
+        {
+          header: 'Статус',
+          field: 'status',
+          columnKey: 'status',
+          width: 140,
+          sortable: true,
+        },
         {
           header: 'Создан',
           field: 'createdAt',

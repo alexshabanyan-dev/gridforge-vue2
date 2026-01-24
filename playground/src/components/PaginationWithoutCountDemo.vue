@@ -2,8 +2,8 @@
   <section class="section">
     <h2>Пагинация без count</h2>
     <p class="section__description">
-      Пример использования пагинации без известного общего количества элементов. Используются флаги
-      isFirst и isLast для навигации.
+      Пример использования пагинации без известного общего количества элементов.
+      Используются флаги isFirst и isLast для навигации.
     </p>
     <GridforgeTable
       :data="paginatedRows"
@@ -30,7 +30,16 @@ export default Vue.extend({
   data() {
     // Генерируем данные для демонстрации
     const allRows: TableRow[] = [];
-    const names = ['Иван', 'Петр', 'Мария', 'Алексей', 'Елена', 'Дмитрий', 'Анна', 'Сергей'];
+    const names = [
+      'Иван',
+      'Петр',
+      'Мария',
+      'Алексей',
+      'Елена',
+      'Дмитрий',
+      'Анна',
+      'Сергей',
+    ];
     const surnames = [
       'Иванов',
       'Петров',
@@ -74,7 +83,8 @@ export default Vue.extend({
         jobTitle: jobs[i % jobs.length],
         company: `Company ${(i % 10) + 1}`,
         phone: `+7 (900) ${String(i).padStart(3, '0')}-${String(i * 2).padStart(2, '0')}-${String(i * 3).padStart(2, '0')}`,
-        status: i % 3 === 0 ? 'Активен' : i % 3 === 1 ? 'Неактивен' : 'В ожидании',
+        status:
+          i % 3 === 0 ? 'Активен' : i % 3 === 1 ? 'Неактивен' : 'В ожидании',
         createdAt: `2024-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
         updatedAt: `2024-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
       });
@@ -90,12 +100,32 @@ export default Vue.extend({
         { header: 'Email', field: 'email', columnKey: 'email', width: 260 },
         { header: 'Возраст', field: 'age', columnKey: 'age', width: 100 },
         { header: 'Город', field: 'city', columnKey: 'city', width: 160 },
-        { header: 'Профессия', field: 'jobTitle', columnKey: 'jobTitle', width: 220 },
-        { header: 'Компания', field: 'company', columnKey: 'company', width: 180 },
+        {
+          header: 'Профессия',
+          field: 'jobTitle',
+          columnKey: 'jobTitle',
+          width: 220,
+        },
+        {
+          header: 'Компания',
+          field: 'company',
+          columnKey: 'company',
+          width: 180,
+        },
         { header: 'Телефон', field: 'phone', columnKey: 'phone', width: 180 },
         { header: 'Статус', field: 'status', columnKey: 'status', width: 140 },
-        { header: 'Создан', field: 'createdAt', columnKey: 'createdAt', width: 140 },
-        { header: 'Обновлен', field: 'updatedAt', columnKey: 'updatedAt', width: 140 },
+        {
+          header: 'Создан',
+          field: 'createdAt',
+          columnKey: 'createdAt',
+          width: 140,
+        },
+        {
+          header: 'Обновлен',
+          field: 'updatedAt',
+          columnKey: 'updatedAt',
+          width: 140,
+        },
       ] as TableColumn[],
     };
   },

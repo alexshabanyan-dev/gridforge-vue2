@@ -1,5 +1,8 @@
 <template>
-  <tbody v-if="table" class="gf-table__body">
+  <tbody
+    v-if="table"
+    class="gf-table__body"
+  >
     <TableBodyRow
       v-for="row in rows"
       :key="row.id"
@@ -9,7 +12,10 @@
       :visible-column-count="visibleColumnCount"
     />
     <tr v-if="!rows.length">
-      <td :colspan="visibleColumnCount" class="gf-table__body-cell">
+      <td
+        :colspan="visibleColumnCount"
+        class="gf-table__body-cell"
+      >
         <div class="gf-table__empty">{{ EMPTY_DATA_TEXT }}</div>
       </td>
     </tr>

@@ -10,6 +10,7 @@
   "volar.takeOverMode.enabled": false,
   "volar.codeLens.pugTools": false,
   "volar.codeLens.scriptSetupTools": false,
+  "volar.formatting.enable": false,
   
   // Отключаем строгие проверки для Vue 2
   "typescript.strict": false,
@@ -21,6 +22,7 @@
   // Editor настройки
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },

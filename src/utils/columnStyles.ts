@@ -22,7 +22,7 @@ function calculateFrozenLeftPosition(
   if (!table || layout !== 'scroll') return 0;
 
   const allColumns = table.getAllLeafColumns();
-  
+
   // Получаем все закрепленные слева колонки в порядке их следования в таблице
   const leftFrozenColumns: Array<{ id: string; size: number }> = [];
   allColumns.forEach((col) => {
@@ -36,7 +36,9 @@ function calculateFrozenLeftPosition(
   });
 
   // Находим индекс текущей колонки среди закрепленных слева
-  const currentIndex = leftFrozenColumns.findIndex((col) => col.id === columnId);
+  const currentIndex = leftFrozenColumns.findIndex(
+    (col) => col.id === columnId,
+  );
   if (currentIndex === -1) return 0;
 
   // Суммируем ширины всех закрепленных слева колонок, которые идут перед текущей
@@ -60,7 +62,7 @@ function calculateFrozenRightPosition(
   if (!table || layout !== 'scroll') return 0;
 
   const allColumns = table.getAllLeafColumns();
-  
+
   // Получаем все закрепленные справа колонки в порядке их следования в таблице
   const rightFrozenColumns: Array<{ id: string; size: number }> = [];
   allColumns.forEach((col) => {
@@ -74,7 +76,9 @@ function calculateFrozenRightPosition(
   });
 
   // Находим индекс текущей колонки среди закрепленных справа
-  const currentIndex = rightFrozenColumns.findIndex((col) => col.id === columnId);
+  const currentIndex = rightFrozenColumns.findIndex(
+    (col) => col.id === columnId,
+  );
   if (currentIndex === -1) return 0;
 
   // Суммируем ширины всех закрепленных справа колонок, которые идут после текущей
@@ -145,16 +149,25 @@ export function getHeaderStyle(
       baseStyles.zIndex = '11';
       baseStyles.backgroundColor = '#fafbfc'; // var(--gf-bg-header)
       if (alignFrozen === 'left') {
-        const leftPos = calculateFrozenLeftPosition(header.column.id, table, layout);
+        const leftPos = calculateFrozenLeftPosition(
+          header.column.id,
+          table,
+          layout,
+        );
         baseStyles.left = `${leftPos}px`;
       } else {
-        const rightPos = calculateFrozenRightPosition(header.column.id, table, layout);
+        const rightPos = calculateFrozenRightPosition(
+          header.column.id,
+          table,
+          layout,
+        );
         baseStyles.right = `${rightPos}px`;
       }
     }
   } else {
     // В fit-режиме используем проценты
-    const total = typeof table.getTotalSize === 'function' ? table.getTotalSize() : 0;
+    const total =
+      typeof table.getTotalSize === 'function' ? table.getTotalSize() : 0;
     const percent =
       total > 0 && size > 0
         ? (size / total) * 100
@@ -202,16 +215,25 @@ export function getCellStyle(
       baseStyles.zIndex = '1';
       baseStyles.backgroundColor = '#ffffff'; // var(--gf-bg-base)
       if (alignFrozen === 'left') {
-        const leftPos = calculateFrozenLeftPosition(cell.column.id, table, layout);
+        const leftPos = calculateFrozenLeftPosition(
+          cell.column.id,
+          table,
+          layout,
+        );
         baseStyles.left = `${leftPos}px`;
       } else {
-        const rightPos = calculateFrozenRightPosition(cell.column.id, table, layout);
+        const rightPos = calculateFrozenRightPosition(
+          cell.column.id,
+          table,
+          layout,
+        );
         baseStyles.right = `${rightPos}px`;
       }
     }
   } else {
     // В fit-режиме используем проценты
-    const total = typeof table.getTotalSize === 'function' ? table.getTotalSize() : 0;
+    const total =
+      typeof table.getTotalSize === 'function' ? table.getTotalSize() : 0;
     const percent =
       total > 0 && size > 0
         ? (size / total) * 100

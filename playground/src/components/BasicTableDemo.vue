@@ -2,9 +2,13 @@
   <section class="section">
     <h2>Базовая таблица</h2>
     <p class="section__description">
-      Таблица растягивается на всю ширину родителя, ширина колонок распределяется автоматически.
+      Таблица растягивается на всю ширину родителя, ширина колонок
+      распределяется автоматически.
     </p>
-    <GridforgeTable :data="rows" :columns="columns" />
+    <GridforgeTable
+      :data="rows"
+      :columns="columns"
+    />
   </section>
 </template>
 
@@ -68,4 +72,3 @@ export default Vue.extend({
   },
 });
 </script>
-

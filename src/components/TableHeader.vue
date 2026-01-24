@@ -1,5 +1,8 @@
 <template>
-  <thead v-if="table" class="gf-table__head">
+  <thead
+    v-if="table"
+    class="gf-table__head"
+  >
     <tr
       v-for="headerGroup in headerGroups"
       :key="headerGroup.id"
@@ -31,10 +34,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import type { PropType } from 'vue';
+import type { Header } from '@tanstack/table-core';
 import type { GridforgeTableInstance } from '../tableCore';
-import type { SortState } from '../types';
+import type { SortState, TableRow } from '../types';
 import TableHeaderCell from './TableHeaderCell.vue';
-import { canReorder } from '../utils/columnReorder';
+
+type HeaderType = Header<TableRow, unknown>;
 
 export default Vue.extend({
   name: 'TableHeader',
@@ -70,29 +75,44 @@ export default Vue.extend({
   computed: {
     headerGroups() {
       if (!this.table) return [];
-      return this.table.getHeaderGroups();
+
+      const groups = this.table.getHeaderGroups();
+      if (groups.length === 0) return [];
+
+      const lastGroup = groups[groups.length - 1];
+
+      const visibleHeaders = lastGroup.headers.filter(
+        (header: HeaderType) => !header.isPlaceholder && header.column,
+      );
+
+      return [
+        {
+          id: lastGroup.id,
+          headers: visibleHeaders,
+        },
+      ];
     },
   },
   methods: {
-    onResizeStart(header: any, event: MouseEvent | TouchEvent) {
+    onResizeStart(header: HeaderType, event: MouseEvent | TouchEvent) {
       this.$emit('resize-start', header, event);
     },
-    onDragStart(header: any, event: DragEvent) {
+    onDragStart(header: HeaderType, event: DragEvent) {
       this.$emit('drag-start', header, event);
     },
-    onDragOver(header: any, event: DragEvent) {
+    onDragOver(header: HeaderType, event: DragEvent) {
       this.$emit('drag-over', header, event);
     },
-    onDrop(header: any, event: DragEvent) {
+    onDrop(header: HeaderType, event: DragEvent) {
       this.$emit('drop', header, event);
     },
     onDragEnd() {
       this.$emit('drag-end');
     },
-    onDragLeave(header: any, event: DragEvent) {
+    onDragLeave(header: HeaderType, event: DragEvent) {
       this.$emit('drag-leave', header, event);
     },
-    onContextMenu(header: any, event: MouseEvent) {
+    onContextMenu(header: HeaderType, event: MouseEvent) {
       this.$emit('context-menu', header, event);
     },
     onSortToggle(columnId: string) {

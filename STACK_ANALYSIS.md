@@ -3,7 +3,9 @@
 ## Анализ существующих проектов
 
 ### 1. GridForge Vue3 (исходная библиотека)
+
 **Стек:**
+
 - Vue 3.4.0 с Composition API
 - @tanstack/vue-table 8.21.3 (управление состоянием таблицы)
 - @tanstack/vue-virtual 3.13.12 (виртуализация)
@@ -13,13 +15,16 @@
 - @vueuse/core для утилит
 
 **Ключевые особенности:**
+
 - Использует TanStack Table для управления состоянием колонок, сортировки, фильтрации
 - Собственная реализация drag-and-drop на нативном HTML5 API
 - Composition API с provide/inject для состояния drag-and-drop
 - Виртуализация для больших таблиц
 
 ### 2. USMT UI (целевой проект)
+
 **Стек:**
+
 - Vue 2.7.8 (последняя версия Vue 2, поддерживает Composition API)
 - PrimeVue 2.10.0 (используется DataTable)
 - TypeScript ~5.1.0
@@ -28,6 +33,7 @@
 - Vue Router 3.5.4
 
 **Текущая реализация таблиц:**
+
 - Используется PrimeVue DataTable
 - Есть базовый функционал перестановки колонок (`reorderable-columns`)
 - Есть базовый функционал изменения видимости колонок (через OverlayPanel с Checkbox)
@@ -38,6 +44,7 @@
 ### Вариант 1: С TanStack Table Core (РЕКОМЕНДУЕТСЯ)
 
 **Стек:**
+
 - **Vue 2.7.8** - последняя версия Vue 2 с поддержкой Composition API
 - **@tanstack/table-core** - framework-agnostic библиотека для управления состоянием таблицы
 - **Нативный HTML5 Drag and Drop API** - для перестановки колонок
@@ -45,6 +52,7 @@
 - **Vue CLI / Vite** - для сборки библиотеки
 
 **Почему этот вариант:**
+
 1. ✅ **Готовая логика из коробки:**
    - `header.getResizeHandler()` - готовый обработчик для изменения ширины
    - `column.getSize()`, `column.getCanResize()` - управление размерами
@@ -73,6 +81,7 @@
    - Итого: ~25-30KB gzipped (вместо 12-18KB без core)
 
 **Реализация для Vue 2:**
+
 ```typescript
 import { createTable } from '@tanstack/table-core';
 import { ref, computed, watch } from 'vue'; // Vue 2.7.8 уже имеет Composition API
@@ -97,16 +106,19 @@ const table = createTable({
 ### Вариант 2: Минималистичный подход (альтернатива)
 
 **Стек:**
+
 - Vue 2.7.8
 - Нативный HTML5 Drag and Drop API
 - Нативные события мыши для resizing
 - TypeScript
 
 **Плюсы:**
+
 - Минимальный bundle size (~12-18KB gzipped)
 - Нет внешних зависимостей
 
 **Минусы:**
+
 - Нужно писать всю логику самостоятельно
 - Больше кода для поддержки
 - Больше потенциальных багов
@@ -115,15 +127,18 @@ const table = createTable({
 ### Вариант 3: С SortableJS (если нативный DnD недостаточен)
 
 **Стек:**
+
 - Vue 2.7.8
 - **SortableJS** - проверенная библиотека для drag-and-drop
 - TypeScript
 
 **Плюсы:**
+
 - Более надежная работа DnD на разных браузерах
 - Больше возможностей кастомизации
 
 **Минусы:**
+
 - Дополнительная зависимость (~15KB)
 - Меньше контроля над процессом
 
@@ -189,9 +204,10 @@ gridforge-vue2/
 ### Ключевые особенности реализации:
 
 1. **Создание таблицы через TanStack Table Core:**
+
    ```typescript
    import { createTable, getCoreRowModel } from '@tanstack/table-core';
-   
+
    const table = createTable({
      data: data.value,
      columns: columnDefs.value,
@@ -203,9 +219,8 @@ gridforge-vue2/
      },
      onColumnSizingChange: (updater) => {
        // Синхронизация с Vue 2 реактивностью
-       columnSizing.value = typeof updater === 'function' 
-         ? updater(columnSizing.value) 
-         : updater;
+       columnSizing.value =
+         typeof updater === 'function' ? updater(columnSizing.value) : updater;
      },
      enableColumnResizing: true,
      enableColumnVisibility: true,
@@ -286,7 +301,7 @@ export default {
   data() {
     return {
       columns: tableColumns.personList,
-      data: []
+      data: [],
     };
   },
   methods: {
@@ -299,8 +314,8 @@ export default {
     },
     handleVisibilityChange(visibleColumns) {
       // Сохранение видимых колонок
-    }
-  }
+    },
+  },
 };
 </script>
 ```
@@ -316,6 +331,7 @@ export default {
 - Переиспользование логики из Vue3 версии
 
 Это даст нам:
+
 - ✅ Профессиональную библиотеку (~25-30KB gzipped)
 - ✅ Быструю разработку (можно переиспользовать ~70-80% кода)
 - ✅ Готовую, проверенную логику для resizing и visibility
@@ -329,6 +345,7 @@ export default {
 ### Технические детали:
 
 **Подход:**
+
 - Использование `@tanstack/table-core` для управления состоянием
 - Нативные события мыши для UI взаимодействия
 - Синхронизация состояния TanStack Table с Vue 2 реактивностью
@@ -336,27 +353,33 @@ export default {
 **Реализация:**
 
 1. **Создание таблицы:**
+
    ```typescript
    import { createTable, getCoreRowModel } from '@tanstack/table-core';
    import { ref, computed, watch } from 'vue';
-   
+
    const columnSizing = ref({});
    const columnsOrder = ref([]);
    const columnVisibility = ref({});
-   
+
    const table = createTable({
      data: data.value,
      columns: columnDefs.value,
      getCoreRowModel: getCoreRowModel(),
      state: {
-       get columnSizing() { return columnSizing.value; },
-       get columnOrder() { return columnsOrder.value; },
-       get columnVisibility() { return columnVisibility.value; },
+       get columnSizing() {
+         return columnSizing.value;
+       },
+       get columnOrder() {
+         return columnsOrder.value;
+       },
+       get columnVisibility() {
+         return columnVisibility.value;
+       },
      },
      onColumnSizingChange: (updater) => {
-       columnSizing.value = typeof updater === 'function' 
-         ? updater(columnSizing.value) 
-         : updater;
+       columnSizing.value =
+         typeof updater === 'function' ? updater(columnSizing.value) : updater;
      },
      enableColumnResizing: true,
      enableColumnVisibility: true,
@@ -368,19 +391,21 @@ export default {
    - Resizer handle в правой части заголовка
    - TanStack Table автоматически обновляет `columnSizing` state
    - Встроенная валидация `minSize` и `maxSize`
+
    ```typescript
    // В TableHeaderCell.vue
    const resizerProps = computed(() => ({
      onMousedown: (e) => {
        e.preventDefault();
        header.getResizeHandler()(e);
-     }
+     },
    }));
    ```
 
 3. **Column Visibility:**
    - Используем `column.getIsVisible()` и `column.toggleVisibility()`
    - TanStack Table автоматически обновляет `columnVisibility` state
+
    ```typescript
    const isVisible = computed(() => column.getIsVisible());
    const toggleVisibility = () => column.toggleVisibility();
@@ -389,6 +414,7 @@ export default {
 4. **Column Reordering:**
    - После drag-and-drop вызываем `table.setColumnOrder(newOrder)`
    - TanStack Table автоматически обновляет порядок колонок
+
    ```typescript
    function handleColumnDrop(sourceId, targetId) {
      const newOrder = reorderArray(columnsOrder.value, sourceId, targetId);

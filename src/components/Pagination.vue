@@ -24,17 +24,28 @@
           v-if="page !== '...'"
           :key="`page-${index}-${page}`"
           class="gf-table__pagination-button"
-          :class="{ 'gf-table__pagination-button--active': page === currentPage }"
+          :class="{
+            'gf-table__pagination-button--active': page === currentPage,
+          }"
           @click="goToPage(Number(page))"
         >
           {{ Number(page) + 1 }}
         </button>
-        <span v-else :key="`ellipsis-${index}`" class="gf-table__pagination-ellipsis"> ... </span>
+        <span
+          v-else
+          :key="`ellipsis-${index}`"
+          class="gf-table__pagination-ellipsis"
+        >
+          ...
+        </span>
       </template>
 
       <button
         class="gf-table__pagination-button"
-        :class="{ 'gf-table__pagination-button--disabled': currentPage === totalPages - 1 }"
+        :class="{
+          'gf-table__pagination-button--disabled':
+            currentPage === totalPages - 1,
+        }"
         :disabled="currentPage === totalPages - 1"
         @click="goToPage(currentPage + 1)"
       >
@@ -42,7 +53,10 @@
       </button>
       <button
         class="gf-table__pagination-button"
-        :class="{ 'gf-table__pagination-button--disabled': currentPage === totalPages - 1 }"
+        :class="{
+          'gf-table__pagination-button--disabled':
+            currentPage === totalPages - 1,
+        }"
         :disabled="currentPage === totalPages - 1"
         @click="goToPage(totalPages - 1)"
       >
@@ -54,7 +68,9 @@
     <template v-else-if="paginationFlags">
       <button
         class="gf-table__pagination-button"
-        :class="{ 'gf-table__pagination-button--disabled': paginationFlags.isFirst }"
+        :class="{
+          'gf-table__pagination-button--disabled': paginationFlags.isFirst,
+        }"
         :disabled="paginationFlags.isFirst"
         @click="goToPrevious"
       >
@@ -62,7 +78,9 @@
       </button>
       <button
         class="gf-table__pagination-button"
-        :class="{ 'gf-table__pagination-button--disabled': paginationFlags.isLast }"
+        :class="{
+          'gf-table__pagination-button--disabled': paginationFlags.isLast,
+        }"
         :disabled="paginationFlags.isLast"
         @click="goToNext"
       >
@@ -94,13 +112,17 @@ export default Vue.extend({
       if (this.pagination) {
         // Предполагаем, что currentPage начинается с 0 (внутренняя логика)
         // Если пользователь передал currentPage начиная с 1, нужно будет конвертировать
-        return this.pagination.currentPage >= 0 ? this.pagination.currentPage : 0;
+        return this.pagination.currentPage >= 0
+          ? this.pagination.currentPage
+          : 0;
       }
       return 0;
     },
     totalPages(): number {
       if (!this.pagination) return 0;
-      return Math.ceil(this.pagination.totalElements / this.pagination.pageSize);
+      return Math.ceil(
+        this.pagination.totalElements / this.pagination.pageSize,
+      );
     },
     visiblePages(): Array<number | string> {
       if (!this.pagination) return [];

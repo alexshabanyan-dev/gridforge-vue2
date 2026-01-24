@@ -14,7 +14,12 @@ export function getColumnKey(column: TableColumn): string {
  * Получает значение ячейки из строки данных
  */
 export function getCellValue(row: TableRow, column: TableColumn): string {
-  if (!row || !column || typeof row !== 'object' || typeof column !== 'object') {
+  if (
+    !row ||
+    !column ||
+    typeof row !== 'object' ||
+    typeof column !== 'object'
+  ) {
     return '';
   }
   const field = column.field as string;

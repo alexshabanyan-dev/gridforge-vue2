@@ -12,14 +12,20 @@
               <div class="sidebar-nav__section-title">Базовая таблица</div>
               <button
                 class="sidebar-nav__item sidebar-nav__item--sub"
-                :class="{ 'sidebar-nav__item--active': activeSection === 'basic' && activePage === 'basic' }"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'basic' && activePage === 'basic',
+                }"
                 @click="setActivePage('basic', 'basic')"
               >
                 Базовая таблица
               </button>
               <button
                 class="sidebar-nav__item sidebar-nav__item--sub"
-                :class="{ 'sidebar-nav__item--active': activeSection === 'basic' && activePage === 'scroll' }"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'basic' && activePage === 'scroll',
+                }"
                 @click="setActivePage('basic', 'scroll')"
               >
                 Таблица со скроллом
@@ -31,14 +37,22 @@
               <div class="sidebar-nav__section-title">Пагинация</div>
               <button
                 class="sidebar-nav__item sidebar-nav__item--sub"
-                :class="{ 'sidebar-nav__item--active': activeSection === 'pagination' && activePage === 'pagination-with-count' }"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'pagination' &&
+                    activePage === 'pagination-with-count',
+                }"
                 @click="setActivePage('pagination', 'pagination-with-count')"
               >
                 Пагинация с count
               </button>
               <button
                 class="sidebar-nav__item sidebar-nav__item--sub"
-                :class="{ 'sidebar-nav__item--active': activeSection === 'pagination' && activePage === 'pagination-without-count' }"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'pagination' &&
+                    activePage === 'pagination-without-count',
+                }"
                 @click="setActivePage('pagination', 'pagination-without-count')"
               >
                 Пагинация без count
@@ -50,7 +64,10 @@
               <div class="sidebar-nav__section-title">Сортировка</div>
               <button
                 class="sidebar-nav__item sidebar-nav__item--sub"
-                :class="{ 'sidebar-nav__item--active': activeSection === 'sorting' && activePage === 'sorting' }"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'sorting' && activePage === 'sorting',
+                }"
                 @click="setActivePage('sorting', 'sorting')"
               >
                 Server-side сортировка
@@ -62,8 +79,12 @@
         <main class="main">
           <BasicTableDemo v-if="activePage === 'basic'" />
           <ScrollTableDemo v-else-if="activePage === 'scroll'" />
-          <PaginationTableDemo v-else-if="activePage === 'pagination-with-count'" />
-          <PaginationWithoutCountDemo v-else-if="activePage === 'pagination-without-count'" />
+          <PaginationTableDemo
+            v-else-if="activePage === 'pagination-with-count'"
+          />
+          <PaginationWithoutCountDemo
+            v-else-if="activePage === 'pagination-without-count'"
+          />
           <SortingDemo v-else-if="activePage === 'sorting'" />
         </main>
       </div>
@@ -93,22 +114,27 @@ export default Vue.extend({
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section') || 'basic';
     const page = urlParams.get('page') || 'basic';
-    
+
     // Определяем валидные комбинации
     const validCombinations: Record<string, string[]> = {
       basic: ['basic', 'scroll'],
       pagination: ['pagination-with-count', 'pagination-without-count'],
       sorting: ['sorting'],
     };
-    
+
     const validSection = validCombinations[section] ? section : 'basic';
-    const validPage = validCombinations[validSection]?.includes(page) 
-      ? page 
+    const validPage = validCombinations[validSection]?.includes(page)
+      ? page
       : validCombinations[validSection][0];
-    
+
     return {
       activeSection: validSection as 'basic' | 'pagination' | 'sorting',
-      activePage: validPage as 'basic' | 'scroll' | 'pagination-with-count' | 'pagination-without-count' | 'sorting',
+      activePage: validPage as
+        | 'basic'
+        | 'scroll'
+        | 'pagination-with-count'
+        | 'pagination-without-count'
+        | 'sorting',
     };
   },
   watch: {
@@ -120,9 +146,17 @@ export default Vue.extend({
     },
   },
   methods: {
-    setActivePage(section: 'basic' | 'pagination' | 'sorting', page: string) {
+    setActivePage(
+      section: 'basic' | 'pagination' | 'sorting',
+      page:
+        | 'basic'
+        | 'scroll'
+        | 'pagination-with-count'
+        | 'pagination-without-count'
+        | 'sorting',
+    ) {
       this.activeSection = section;
-      this.activePage = page as any;
+      this.activePage = page;
     },
     updateUrl() {
       const url = new URL(window.location.href);
@@ -143,7 +177,8 @@ export default Vue.extend({
 
 #app {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -266,7 +301,9 @@ export default Vue.extend({
   flex-direction: column;
   gap: 0;
   padding: 24px;
-  /* важно для grid: позволяем содержимому ужиматься и не растягивать всю страницу */
+  /* важно для grid:
+     позволяем содержимому ужиматься
+     и не растягивать всю страницу */
   min-width: 0;
   background: #ffffff;
   overflow-y: auto;

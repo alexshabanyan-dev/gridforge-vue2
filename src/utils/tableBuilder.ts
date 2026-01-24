@@ -1,7 +1,13 @@
+import type { Updater } from '@tanstack/table-core';
 import type { TableColumn, TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { createTanstackTable } from '../tableCore';
-import { createFitModeResizeHandler, getFullColumnSizing } from './columnResize';
+import {
+  createFitModeResizeHandler,
+  getFullColumnSizing,
+} from './columnResize';
+
+type ColumnSizingState = Record<string, number>;
 
 /**
  * Создаёт и настраивает экземпляр таблицы TanStack
@@ -16,10 +22,7 @@ export function buildTable(
   const table = createTanstackTable(data || [], columns || []);
   if (!table) return null;
 
-  // Сохраняем оригинальный setColumnSizing
   const originalSetColumnSizing = table.setColumnSizing.bind(table);
-
-  // Создаём обработчик ресайза с логикой "только две колонки" для fit-режима
   const fitModeHandler = createFitModeResizeHandler(
     table,
     layout,
@@ -27,10 +30,12 @@ export function buildTable(
     onSizingUpdate,
   );
 
-  // Переопределяем setColumnSizing
-  (table as any).setColumnSizing = (updater: any) => {
+  const override = (updater: Updater<ColumnSizingState>) => {
     fitModeHandler(updater, originalSetColumnSizing);
   };
+  (
+    table as GridforgeTableInstance & { setColumnSizing: typeof override }
+  ).setColumnSizing = override;
 
   return table;
 }
@@ -38,6 +43,8 @@ export function buildTable(
 /**
  * Инициализирует previousColumnSizing для таблицы
  */
-export function initializeColumnSizing(table: GridforgeTableInstance): Record<string, number> {
+export function initializeColumnSizing(
+  table: GridforgeTableInstance,
+): Record<string, number> {
   return getFullColumnSizing(table);
 }

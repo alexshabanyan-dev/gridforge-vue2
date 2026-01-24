@@ -13,5 +13,20 @@ module.exports = {
   },
   rules: {
     'vue/multi-word-component-names': 'off',
+    'vue/max-attributes-per-line': [
+      'error',
+      { singleline: 1, multiline: 1 },
+    ],
+    '@typescript-eslint/no-explicit-any': 'error',
+    'max-len': [
+      'error',
+      {
+        code: 80,
+        ignoreComments: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreUrls: true,
+      },
+    ],
   },
 };

@@ -43,7 +43,12 @@ export default Vue.extend({
   },
   computed: {
     cellStyle(): Record<string, string> {
-      return getCellStyle(this.cell, this.table, this.layout, this.visibleColumnCount);
+      return getCellStyle(
+        this.cell,
+        this.table,
+        this.layout,
+        this.visibleColumnCount,
+      );
     },
     columnMeta(): ColumnMeta {
       if (!this.cell.column) return {};

@@ -2,8 +2,9 @@
   <section class="section">
     <h2>Таблица с горизонтальным скроллом</h2>
     <p class="section__description">
-      Таблица визуально занимает 100% ширины родителя, но при этом появляется горизонтальный скролл,
-      а ширина колонок берётся из <code>column.width</code>.
+      Таблица визуально занимает 100% ширины родителя, но при этом появляется
+      горизонтальный скролл, а ширина колонок берётся из
+      <code>column.width</code>.
     </p>
     <GridforgeTable
       :data="rows"
@@ -38,14 +39,39 @@ export default Vue.extend({
         { header: 'Email', field: 'email', columnKey: 'email', width: 260 },
         { header: 'Возраст', field: 'age', columnKey: 'age', width: 100 },
         { header: 'Город', field: 'city', columnKey: 'city', width: 160 },
-        { header: 'Профессия', field: 'jobTitle', columnKey: 'jobTitle', width: 220 },
-        { header: 'Компания', field: 'company', columnKey: 'company', width: 220 },
+        {
+          header: 'Профессия',
+          field: 'jobTitle',
+          columnKey: 'jobTitle',
+          width: 220,
+        },
+        {
+          header: 'Компания',
+          field: 'company',
+          columnKey: 'company',
+          width: 220,
+        },
         { header: 'Телефон', field: 'phone', columnKey: 'phone', width: 180 },
-        { header: 'Страна', field: 'country', columnKey: 'country', width: 160 },
+        {
+          header: 'Страна',
+          field: 'country',
+          columnKey: 'country',
+          width: 160,
+        },
         { header: 'Адрес', field: 'address', columnKey: 'address', width: 300 },
-        { header: 'Почтовый индекс', field: 'zip', columnKey: 'zip', width: 140 },
+        {
+          header: 'Почтовый индекс',
+          field: 'zip',
+          columnKey: 'zip',
+          width: 140,
+        },
         { header: 'Статус', field: 'status', columnKey: 'status', width: 140 },
-        { header: 'Создан', field: 'createdAt', columnKey: 'createdAt', width: 180 },
+        {
+          header: 'Создан',
+          field: 'createdAt',
+          columnKey: 'createdAt',
+          width: 180,
+        },
         {
           header: 'Обновлен',
           field: 'updatedAt',

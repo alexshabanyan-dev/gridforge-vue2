@@ -1,6 +1,10 @@
 <template>
   <div :class="['gf-table', customClass]">
-    <TableBar :table="table" :columns="leafColumns" @visibility-change="onColumnVisibilityChange" />
+    <TableBar
+      :table="table"
+      :columns="leafColumns"
+      @visibility-change="onColumnVisibilityChange"
+    />
     <div class="gf-table__wrapper">
       <table :class="tableClass">
         <TableHeader
@@ -19,7 +23,11 @@
           :sort-by="effectiveSortBy"
           @sort-toggle="onSortToggle"
         />
-        <TableBody :table="table" :layout="layout" :visible-column-count="visibleColumnCount" />
+        <TableBody
+          :table="table"
+          :layout="layout"
+          :visible-column-count="visibleColumnCount"
+        />
       </table>
     </div>
     <TableFooter
@@ -44,18 +52,27 @@
 <script lang="ts">
 import Vue from 'vue';
 import type { PropType } from 'vue';
-import type { TableColumn, TableRow } from '../types';
+import type { Column } from '@tanstack/table-core';
 import type { Header } from '@tanstack/table-core';
+import type { TableColumn, TableRow } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { buildTable, initializeColumnSizing } from '../utils/tableBuilder';
 import { updateAutoMinSizes } from '../utils/columnMeasure';
-import { handleDragStart, handleDragOver, handleDrop } from '../utils/columnReorder';
+import {
+  handleDragStart,
+  handleDragOver,
+  handleDrop,
+} from '../utils/columnReorder';
 import TableBar from './TableBar.vue';
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
 import TableFooter from './TableFooter.vue';
 import ColumnContextMenu from './ColumnContextMenu.vue';
-import type { PaginationWithTotal, PaginationWithFlags, SortState } from '../types';
+import type {
+  PaginationWithTotal,
+  PaginationWithFlags,
+  SortState,
+} from '../types';
 
 export default Vue.extend({
   name: 'GridforgeTable',
@@ -133,10 +150,9 @@ export default Vue.extend({
       if (!this.table) return 0;
       return this.table.getVisibleLeafColumns().length;
     },
-    leafColumns() {
+    leafColumns(): Column<TableRow, unknown>[] {
       if (!this.table) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return this.table.getAllLeafColumns() as any[];
+      return this.table.getAllLeafColumns();
     },
     // Переупорядочиваем колонки: закрепленные слева -> обычные -> закрепленные справа
     showPagination(): boolean {
@@ -271,7 +287,10 @@ export default Vue.extend({
         this.$forceUpdate();
       });
     },
-    onResizeStart(header: Header<TableRow, unknown>, event: MouseEvent | TouchEvent) {
+    onResizeStart(
+      header: Header<TableRow, unknown>,
+      event: MouseEvent | TouchEvent,
+    ) {
       if (!header.column.getCanResize || !header.column.getCanResize()) return;
       const handler = header.getResizeHandler?.();
       if (handler) {
@@ -363,7 +382,7 @@ export default Vue.extend({
           if (alignFrozen) {
             updated.alignFrozen = alignFrozen;
           } else {
-            // Удаляем alignFrozen, создавая новый объект без этого свойства
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { alignFrozen: _, ...rest } = updated;
             return rest;
           }
@@ -412,7 +431,11 @@ export default Vue.extend({
         return aIndex - bIndex;
       });
 
-      const reorderedColumns = [...leftFrozenOrdered, ...normal, ...rightFrozenOrdered];
+      const reorderedColumns = [
+        ...leftFrozenOrdered,
+        ...normal,
+        ...rightFrozenOrdered,
+      ];
 
       // Закрываем меню
       this.onContextMenuHide();
@@ -430,7 +453,9 @@ export default Vue.extend({
     },
     onSortToggle(columnId: string) {
       const currentSort = this.effectiveSortBy;
-      const existingIndex = currentSort.findIndex((sort) => sort.id === columnId);
+      const existingIndex = currentSort.findIndex(
+        (sort) => sort.id === columnId,
+      );
 
       let nextSort: SortState[];
 
