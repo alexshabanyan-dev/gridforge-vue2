@@ -8,6 +8,9 @@
     <GridforgeTable
       :data="rows"
       :columns="columns"
+      :action-column-params="actionColumnParams"
+      @row-edit="onRowEdit"
+      @row-delete="onRowDelete"
     />
   </section>
 </template>
@@ -15,7 +18,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { GridforgeTable } from '@/index';
-import type { TableColumn, TableRow } from '@/types';
+import type { TableColumn, TableRow, ActionColumnItem } from '@/types';
 
 export default Vue.extend({
   name: 'BasicTableDemo',
@@ -24,6 +27,10 @@ export default Vue.extend({
   },
   data() {
     return {
+      actionColumnParams: [
+        { title: 'Редактировать', code: 'edit', emitEvent: 'row-edit' },
+        { title: 'Удалить', code: 'delete', emitEvent: 'row-delete' },
+      ] as ActionColumnItem[],
       columns: [
         { header: 'ID', field: 'id', columnKey: 'id' },
         { header: 'Имя', field: 'name', columnKey: 'name' },
@@ -69,6 +76,16 @@ export default Vue.extend({
         },
       ] as TableRow[],
     };
+  },
+  methods: {
+    onRowEdit(payload: { row: TableRow; code: string }) {
+      // eslint-disable-next-line no-console
+      console.log('row-edit', payload);
+    },
+    onRowDelete(payload: { row: TableRow; code: string }) {
+      // eslint-disable-next-line no-console
+      console.log('row-delete', payload);
+    },
   },
 });
 </script>

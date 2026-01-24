@@ -1,5 +1,5 @@
 import type { Updater } from '@tanstack/table-core';
-import type { TableColumn, TableRow } from '../types';
+import type { TableColumn, TableRow, ActionColumnItem } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { createTanstackTable } from '../tableCore';
 import {
@@ -18,8 +18,16 @@ export function buildTable(
   layout: 'fit' | 'scroll',
   getPreviousColumnSizing: () => Record<string, number>,
   onSizingUpdate: (sizing: Record<string, number>) => void,
+  actionColumnParams?: ActionColumnItem[],
+  actionColumnWidth?: number,
 ): GridforgeTableInstance | null {
-  const table = createTanstackTable(data || [], columns || []);
+  const table = createTanstackTable(
+    data || [],
+    columns || [],
+    layout,
+    actionColumnParams,
+    actionColumnWidth,
+  );
   if (!table) return null;
 
   const originalSetColumnSizing = table.setColumnSizing.bind(table);

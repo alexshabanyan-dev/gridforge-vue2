@@ -10,7 +10,10 @@
       :data="rows"
       :columns="columns"
       layout="scroll"
+      :action-column-params="actionColumnParams"
       @columns-change="onColumnsChange"
+      @row-edit="onRowEdit"
+      @row-delete="onRowDelete"
     />
   </section>
 </template>
@@ -18,7 +21,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { GridforgeTable } from '@/index';
-import type { TableColumn, TableRow } from '@/types';
+import type { TableColumn, TableRow, ActionColumnItem } from '@/types';
 
 export default Vue.extend({
   name: 'ScrollTableDemo',
@@ -27,6 +30,15 @@ export default Vue.extend({
   },
   data() {
     return {
+      actionColumnParams: [
+        { title: 'Редактировать', code: 'edit', emitEvent: 'row-edit' },
+        {
+          title: 'Удалить',
+          code: 'delete',
+          emitEvent: 'row-delete',
+          visible: (row: TableRow) => !!row.deletable,
+        },
+      ] as ActionColumnItem[],
       columns: [
         {
           header: 'ID',
@@ -93,6 +105,7 @@ export default Vue.extend({
           address: 'ул. Ленина, 1',
           zip: '101000',
           status: 'Активен',
+          deletable: 'true',
           createdAt: '2024-01-01',
           updatedAt: '2024-02-01',
         },
@@ -165,7 +178,6 @@ export default Vue.extend({
   },
   methods: {
     onColumnsChange(updatedColumns: TableColumn[]) {
-      // Создаем полностью новый массив с новыми объектами
       this.columns = updatedColumns.map((col) => {
         const newCol: TableColumn = { ...col };
         if (col.alignFrozen) {
@@ -173,6 +185,14 @@ export default Vue.extend({
         }
         return newCol;
       });
+    },
+    onRowEdit(payload: { row: TableRow; code: string }) {
+      // eslint-disable-next-line no-console
+      console.log('row-edit', payload);
+    },
+    onRowDelete(payload: { row: TableRow; code: string }) {
+      // eslint-disable-next-line no-console
+      console.log('row-delete', payload);
     },
   },
 });

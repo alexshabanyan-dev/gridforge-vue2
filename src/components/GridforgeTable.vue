@@ -2,7 +2,7 @@
   <div :class="['gf-table', customClass]">
     <TableBar
       :table="table"
-      :columns="leafColumns"
+      :columns="leafColumnsForMenu"
       @visibility-change="onColumnVisibilityChange"
     />
     <div class="gf-table__wrapper">
@@ -27,6 +27,8 @@
           :table="table"
           :layout="layout"
           :visible-column-count="visibleColumnCount"
+          :action-column-params="actionColumnParams"
+          @action="onAction"
         />
       </table>
     </div>
@@ -72,7 +74,12 @@ import type {
   PaginationWithTotal,
   PaginationWithFlags,
   SortState,
+  ActionColumnItem,
 } from '../types';
+import {
+  ACTION_COLUMN_ID,
+  ACTION_COLUMN_WIDTH,
+} from '../constants/tableConstants';
 
 export default Vue.extend({
   name: 'GridforgeTable',
@@ -126,6 +133,14 @@ export default Vue.extend({
       type: Array as PropType<SortState[]>,
       default: undefined,
     },
+    actionColumnParams: {
+      type: Array as PropType<ActionColumnItem[]>,
+      default: undefined,
+    },
+    actionColumnWidth: {
+      type: Number,
+      default: undefined,
+    },
   },
   data() {
     return {
@@ -153,6 +168,11 @@ export default Vue.extend({
     leafColumns(): Column<TableRow, unknown>[] {
       if (!this.table) return [];
       return this.table.getAllLeafColumns();
+    },
+    leafColumnsForMenu(): Column<TableRow, unknown>[] {
+      return this.leafColumns.filter(
+        (col) => (col.id as string) !== ACTION_COLUMN_ID,
+      );
     },
     // Переупорядочиваем колонки: закрепленные слева -> обычные -> закрепленные справа
     showPagination(): boolean {
@@ -216,13 +236,36 @@ export default Vue.extend({
     columns: {
       handler() {
         this.buildTable();
-        // Пересчитываем автоматические minSize после изменения колонок
         this.$nextTick(() => {
           this.updateAutoMinSizes();
           this.$forceUpdate();
         });
       },
       deep: true,
+    },
+    actionColumnParams: {
+      handler() {
+        this.buildTable();
+        this.$nextTick(() => {
+          this.updateAutoMinSizes();
+          this.$forceUpdate();
+        });
+      },
+      deep: true,
+    },
+    layout() {
+      this.buildTable();
+      this.$nextTick(() => {
+        this.updateAutoMinSizes();
+        this.$forceUpdate();
+      });
+    },
+    actionColumnWidth() {
+      this.buildTable();
+      this.$nextTick(() => {
+        this.updateAutoMinSizes();
+        this.$forceUpdate();
+      });
     },
   },
   created() {
@@ -243,6 +286,14 @@ export default Vue.extend({
   },
   methods: {
     buildTable() {
+      // Очищаем старое значение action колонки из previousColumnSizing
+      // чтобы гарантировать применение нового размера
+      if (ACTION_COLUMN_ID in this.previousColumnSizing) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [ACTION_COLUMN_ID]: _, ...rest } = this.previousColumnSizing;
+        this.previousColumnSizing = rest;
+      }
+
       // Используем переупорядоченные колонки для построения таблицы
       this.table = buildTable(
         this.data || [],
@@ -252,9 +303,20 @@ export default Vue.extend({
         (sizing) => {
           this.previousColumnSizing = sizing;
         },
+        this.actionColumnParams,
+        this.actionColumnWidth ?? ACTION_COLUMN_WIDTH,
       );
 
       if (this.table) {
+        // Явно устанавливаем размер action колонки, если она есть
+        if (this.actionColumnParams && this.actionColumnParams.length > 0) {
+          const actionWidth = this.actionColumnWidth ?? ACTION_COLUMN_WIDTH;
+          const currentSizing = this.table.getState().columnSizing;
+          this.table.setColumnSizing({
+            ...currentSizing,
+            [ACTION_COLUMN_ID]: actionWidth,
+          });
+        }
         // Инициализируем previousColumnSizing текущими размерами колонок
         this.previousColumnSizing = initializeColumnSizing(this.table);
       }
@@ -365,6 +427,12 @@ export default Vue.extend({
       this.contextMenuVisible = false;
       this.contextMenuHeader = null;
       this.contextMenuPosition = null;
+    },
+    onAction(payload: { emitEvent: string; row: TableRow; code: string }) {
+      this.$emit(payload.emitEvent, {
+        row: payload.row,
+        code: payload.code,
+      });
     },
     onColumnFreeze(alignFrozen: 'left' | 'right' | null) {
       if (!this.contextMenuHeader?.column) return;

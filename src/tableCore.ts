@@ -7,7 +7,11 @@ import {
   type Updater,
   type TableOptionsResolved,
 } from '@tanstack/table-core';
-import type { TableRow, TableColumn } from './types';
+import type { TableRow, TableColumn, ActionColumnItem } from './types';
+import {
+  ACTION_COLUMN_ID,
+  ACTION_COLUMN_WIDTH,
+} from './constants/tableConstants';
 
 export type GridforgeTableInstance = Table<TableRow>;
 
@@ -46,13 +50,53 @@ export function toColumnDefs(
   });
 }
 
+function buildActionColumnDef(
+  layout: 'fit' | 'scroll',
+  actionColumnParams: ActionColumnItem[],
+  width: number,
+): ColumnDef<TableRow, unknown> {
+  return {
+    id: ACTION_COLUMN_ID,
+    accessorKey: ACTION_COLUMN_ID,
+    header: '',
+    size: width,
+    minSize: width,
+    maxSize: width,
+    enableResizing: false,
+    meta: {
+      isActionColumn: true,
+      actionColumnParams,
+      alignFrozen: layout === 'scroll' ? 'right' : undefined,
+    },
+  };
+}
+
 export function createTanstackTable(
   data: TableRow[],
   columns: TableColumn[],
+  layout: 'fit' | 'scroll',
+  actionColumnParams?: ActionColumnItem[],
+  actionColumnWidth?: number,
 ): GridforgeTableInstance {
+  const userDefs = toColumnDefs(columns || []);
+  const hasAction = Boolean(
+    actionColumnParams && actionColumnParams.length > 0,
+  );
+  const actionDef = hasAction
+    ? buildActionColumnDef(
+        layout,
+        actionColumnParams!,
+        actionColumnWidth ?? ACTION_COLUMN_WIDTH,
+      )
+    : null;
+
+  const cols: ColumnDef<TableRow, unknown>[] = actionDef
+    ? [...userDefs, actionDef]
+    : userDefs;
+
   const table = createTable<TableRow>({
     data: data || [],
-    columns: toColumnDefs(columns || []),
+    columns: cols,
     getCoreRowModel: getCoreRowModel(),
     // Ресайз колонок: обновляем ширину в процессе движения
     columnResizeMode: 'onChange',

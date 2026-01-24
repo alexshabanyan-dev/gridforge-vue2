@@ -7,6 +7,8 @@
       :layout="layout"
       :table="table"
       :visible-column-count="visibleColumnCount"
+      :action-column-params="actionColumnParams"
+      @action="$emit('action', $event)"
     />
   </tr>
 </template>
@@ -15,7 +17,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Row } from '@tanstack/table-core';
-import type { TableRow } from '../types';
+import type { TableRow, ActionColumnItem } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import TableBodyCell from './TableBodyCell.vue';
 
@@ -40,6 +42,10 @@ export default Vue.extend({
     visibleColumnCount: {
       type: Number,
       required: true,
+    },
+    actionColumnParams: {
+      type: Array as PropType<ActionColumnItem[]>,
+      default: undefined,
     },
   },
   computed: {

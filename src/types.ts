@@ -4,11 +4,27 @@
 export type TableRow = Record<string, unknown>;
 
 /**
+ * Параметры пункта колонки действий (кнопка в контекстном меню)
+ */
+export interface ActionColumnItem {
+  /** Текст кнопки */
+  title: string;
+  /** Код действия (передаётся в payload при emit) */
+  code: string;
+  /** Имя события при нажатии (emit сверху) */
+  emitEvent: string;
+  /** Видимость кнопки. (row) => boolean. Если не задано — всегда видна. */
+  visible?: (row: TableRow) => boolean;
+}
+
+/**
  * Метаданные колонки в TanStack Table
  */
 export interface ColumnMeta {
   alignFrozen?: 'left' | 'right';
   sortable?: boolean;
+  isActionColumn?: boolean;
+  actionColumnParams?: ActionColumnItem[];
 }
 
 /**
@@ -100,4 +116,8 @@ export interface GridforgeTableProps<T = TableRow> {
   paginationFlags?: PaginationWithFlags;
   /** Текущее состояние сортировки (controlled) */
   sortBy?: SortState[];
+  /** Колонка действий слева (fit) / справа sticky (scroll). Иконка ⋮, меню по клику. */
+  actionColumnParams?: ActionColumnItem[];
+  /** Ширина колонки действий в px (по умолчанию ACTION_COLUMN_WIDTH). */
+  actionColumnWidth?: number;
 }

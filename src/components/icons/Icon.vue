@@ -18,6 +18,8 @@ import sortIconSvg from '../../assets/icons/Sort.svg?raw';
 import sortAscendingIconSvg from '../../assets/icons/SortAscending.svg?raw';
 // @ts-expect-error Vite ?raw
 import sortDescendingIconSvg from '../../assets/icons/SortDescending.svg?raw';
+// @ts-expect-error Vite ?raw
+import ellipsisVerticalIconSvg from '../../assets/icons/EllipsisVerticalSolid.svg?raw';
 
 // Маппинг имен иконок на их SVG содержимое
 const iconMap: Record<string, string> = {
@@ -26,6 +28,7 @@ const iconMap: Record<string, string> = {
   sort: sortIconSvg as string,
   sortAsc: sortAscendingIconSvg as string,
   sortDesc: sortDescendingIconSvg as string,
+  ellipsisVertical: ellipsisVerticalIconSvg as string,
 };
 
 // Константы для иконок сортировки (вынесены для оптимизации)

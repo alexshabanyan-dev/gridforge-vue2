@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/table-core';
 import type { TableColumn, TableRow } from '../types';
+import { ACTION_COLUMN_ID } from '../constants/tableConstants';
 import type { GridforgeTableInstance } from '../tableCore';
 import { HEADER_PADDING, RESIZER_SPACE } from '../constants/tableConstants';
 
@@ -82,6 +83,7 @@ export function updateAutoMinSizes(
 
     const column = allColumns[index];
     const columnId = column.id as string;
+    if (columnId === ACTION_COLUMN_ID) return;
 
     // Пропускаем колонки, у которых уже задан minWidth в props
     const originalColumn = columns.find(

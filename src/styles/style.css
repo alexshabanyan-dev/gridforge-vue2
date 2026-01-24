@@ -513,6 +513,154 @@
   transform: translateX(2px) scale(0.98);
 }
 
+/* Анимация появления action-меню */
+@keyframes gf-action-menu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Анимация появления пунктов меню (каскад) */
+@keyframes gf-action-menu-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.gf-table__action-menu-dropdown {
+  min-width: 192px;
+  background: var(--gf-bg-glass-strong);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--gf-radius-lg);
+  border: 1px solid var(--gf-border-color);
+  box-shadow:
+    var(--gf-shadow-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+    0 8px 32px -8px rgba(59, 130, 246, 0.12);
+  overflow: hidden;
+  padding: var(--gf-spacing-sm) 0;
+  animation: gf-action-menu-enter 0.22s var(--gf-ease-out) forwards;
+}
+
+.gf-table__action-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: var(--gf-spacing-sm) var(--gf-spacing-lg);
+  padding-left: var(--gf-spacing-lg);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  color: var(--gf-text-primary);
+  font-weight: 400;
+  margin: 0 var(--gf-spacing-sm);
+  border-radius: var(--gf-radius-md);
+  position: relative;
+  animation: gf-action-menu-item-enter 0.2s var(--gf-ease-out) both;
+}
+
+.gf-table__action-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--gf-color-primary);
+  opacity: 0;
+  transform: scaleY(0);
+  border-radius: 0 2px 2px 0;
+  transition:
+    opacity var(--gf-transition-fast) var(--gf-ease-out),
+    transform var(--gf-transition-fast) var(--gf-ease-out);
+}
+
+.gf-table__action-menu-item:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.gf-table__action-menu-item:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.gf-table__action-menu-item:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.gf-table__action-menu-item:nth-child(4) {
+  animation-delay: 0.11s;
+}
+.gf-table__action-menu-item:nth-child(5) {
+  animation-delay: 0.14s;
+}
+.gf-table__action-menu-item:nth-child(n + 6) {
+  animation-delay: 0.17s;
+}
+
+.gf-table__action-menu-item:hover::before,
+.gf-table__action-menu-item:focus::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.gf-table__action-menu-item:focus {
+  outline: none;
+}
+
+.gf-table__action-menu-item:active::before {
+  opacity: 1;
+  transform: scaleY(1);
+  background: var(--gf-color-primary-dark);
+}
+
+.gf-table__action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gf-table__action-cell__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gf-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--gf-radius-sm);
+  flex-shrink: 0;
+  transition:
+    color var(--gf-transition-base),
+    background var(--gf-transition-base);
+}
+
+.gf-table__action-cell__trigger:hover {
+  color: var(--gf-color-primary);
+  background: var(--gf-bg-hover);
+}
+
+.gf-table__action-cell__trigger:focus {
+  outline: 2px solid var(--gf-color-primary);
+  outline-offset: -1px;
+}
+
 /* ==========================================================================
    Wrapper и таблица
    ========================================================================== */
@@ -1020,6 +1168,51 @@
     0 0 0 1px rgba(37, 99, 235, 0.05);
 }
 
+/* Action-колонка в scroll: мягче фон и граница, но всё ещё выделена */
+.gf-table__head-cell--action.gf-table__head-cell--frozen-right-border {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gf-bg-header),
+    #f1f5f9
+  ) !important;
+  box-shadow:
+    -2px 0 10px -4px rgba(0, 0, 0, 0.06),
+    0 0 0 1px var(--gf-border-color-light);
+}
+
+.gf-table__head-cell--action.gf-table__head-cell--frozen-right-border::before {
+  background: linear-gradient(
+    to bottom,
+    var(--gf-text-tertiary),
+    var(--gf-border-color-strong)
+  );
+  opacity: 0.5;
+  width: 2px;
+  box-shadow: none;
+}
+
+.gf-table__body-cell--action.gf-table__body-cell--frozen-right-border {
+  background-image: linear-gradient(
+    to bottom,
+    var(--gf-bg-base),
+    #f8fafc
+  ) !important;
+  box-shadow:
+    -2px 0 10px -4px rgba(0, 0, 0, 0.06),
+    0 0 0 1px var(--gf-border-color-light);
+}
+
+.gf-table__body-cell--action.gf-table__body-cell--frozen-right-border::before {
+  background: linear-gradient(
+    to bottom,
+    var(--gf-text-tertiary),
+    var(--gf-border-color-strong)
+  );
+  opacity: 0.5;
+  width: 2px;
+  box-shadow: none;
+}
+
 /* ==========================================================================
    Тело таблицы - современный стиль
    ========================================================================== */
@@ -1051,6 +1244,11 @@
   font-weight: 400;
   /* Тонкие деликатные границы между ячейками */
   border-right: 1px solid var(--gf-border-color-light);
+}
+
+.gf-table__body-cell--action {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .gf-table__body-row .gf-table__body-cell:last-child {

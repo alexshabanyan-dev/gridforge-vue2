@@ -9,3 +9,7 @@ export const DELTA_THRESHOLD = 0.1; // Порог для определения 
 
 export const EMPTY_DATA_TEXT = 'Нет данных';
 export const COLUMN_MENU_TITLE = 'Колонки';
+
+export const ACTION_COLUMN_ID = '__gf_action__';
+/** Ширина колонки действий по умолчанию. Смена требует полной перезагрузки. */
+export const ACTION_COLUMN_WIDTH = 20;

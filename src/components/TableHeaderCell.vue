@@ -3,6 +3,7 @@
     v-if="header"
     class="gf-table__head-cell"
     :class="{
+      'gf-table__head-cell--action': isActionColumn,
       'gf-table__head-cell--draggable': canReorder,
       'gf-table__head-cell--dragging': isDragging,
       'gf-table__head-cell--drop-target': isDropTarget,
@@ -147,6 +148,9 @@ export default Vue.extend({
     isFrozenRight(): boolean {
       return this.columnMeta.alignFrozen === 'right';
     },
+    isActionColumn(): boolean {
+      return Boolean(this.columnMeta.isActionColumn);
+    },
     isLastFrozenLeft(): boolean {
       if (!this.table || !this.isFrozenLeft) return false;
       const allColumns = this.table.getAllLeafColumns();
@@ -168,9 +172,6 @@ export default Vue.extend({
       if (rightFrozen.length === 0) return false;
       const firstFrozen = rightFrozen[0];
       return firstFrozen.id === this.header.column.id;
-    },
-    getColumnMetaFromDef(columnDef: { meta?: unknown }): ColumnMeta {
-      return (columnDef.meta as ColumnMeta) || {};
     },
     currentSortState(): SortState | undefined {
       if (!this.header.column) return undefined;
@@ -198,6 +199,9 @@ export default Vue.extend({
     },
   },
   methods: {
+    getColumnMetaFromDef(columnDef: { meta?: unknown }): ColumnMeta {
+      return (columnDef.meta as ColumnMeta) || {};
+    },
     onResizeStart(event: MouseEvent | TouchEvent) {
       if (
         !this.header.column.getCanResize ||

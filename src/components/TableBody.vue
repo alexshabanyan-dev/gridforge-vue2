@@ -10,6 +10,8 @@
       :layout="layout"
       :table="table"
       :visible-column-count="visibleColumnCount"
+      :action-column-params="actionColumnParams"
+      @action="$emit('action', $event)"
     />
     <tr v-if="!rows.length">
       <td
@@ -25,6 +27,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import type { PropType } from 'vue';
+import type { ActionColumnItem } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
 import { EMPTY_DATA_TEXT } from '../constants/tableConstants';
 import TableBodyRow from './TableBodyRow.vue';
@@ -46,6 +49,10 @@ export default Vue.extend({
     visibleColumnCount: {
       type: Number,
       required: true,
+    },
+    actionColumnParams: {
+      type: Array as PropType<ActionColumnItem[]>,
+      default: undefined,
     },
   },
   data() {

@@ -15,6 +15,7 @@ export type {
   SortState,
   SortDirection,
   ColumnMeta,
+  ActionColumnItem,
 } from './types';
 
 // Plugin installation for Vue 2
