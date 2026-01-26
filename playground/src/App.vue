@@ -73,6 +73,32 @@
                 Server-side сортировка
               </button>
             </div>
+
+            <!-- Раздел: Сохранение состояния -->
+            <div class="sidebar-nav__section">
+              <div class="sidebar-nav__section-title">Сохранение состояния</div>
+              <button
+                class="sidebar-nav__item sidebar-nav__item--sub"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'persist' && activePage === 'persist-fit',
+                }"
+                @click="setActivePage('persist', 'persist-fit')"
+              >
+                Fit + persist
+              </button>
+              <button
+                class="sidebar-nav__item sidebar-nav__item--sub"
+                :class="{
+                  'sidebar-nav__item--active':
+                    activeSection === 'persist' &&
+                    activePage === 'persist-scroll',
+                }"
+                @click="setActivePage('persist', 'persist-scroll')"
+              >
+                Scroll + persist
+              </button>
+            </div>
           </nav>
         </aside>
 
@@ -86,6 +112,8 @@
             v-else-if="activePage === 'pagination-without-count'"
           />
           <SortingDemo v-else-if="activePage === 'sorting'" />
+          <PersistStateFitDemo v-else-if="activePage === 'persist-fit'" />
+          <PersistStateScrollDemo v-else-if="activePage === 'persist-scroll'" />
         </main>
       </div>
     </div>
@@ -99,6 +127,18 @@ import ScrollTableDemo from './components/ScrollTableDemo.vue';
 import PaginationTableDemo from './components/PaginationTableDemo.vue';
 import PaginationWithoutCountDemo from './components/PaginationWithoutCountDemo.vue';
 import SortingDemo from './components/SortingDemo.vue';
+import PersistStateFitDemo from './components/PersistStateFitDemo.vue';
+import PersistStateScrollDemo from './components/PersistStateScrollDemo.vue';
+
+type Section = 'basic' | 'pagination' | 'sorting' | 'persist';
+type Page =
+  | 'basic'
+  | 'scroll'
+  | 'pagination-with-count'
+  | 'pagination-without-count'
+  | 'sorting'
+  | 'persist-fit'
+  | 'persist-scroll';
 
 export default Vue.extend({
   name: 'App',
@@ -108,18 +148,19 @@ export default Vue.extend({
     PaginationTableDemo,
     PaginationWithoutCountDemo,
     SortingDemo,
+    PersistStateFitDemo,
+    PersistStateScrollDemo,
   },
   data() {
-    // Читаем из URL при инициализации
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section') || 'basic';
     const page = urlParams.get('page') || 'basic';
 
-    // Определяем валидные комбинации
     const validCombinations: Record<string, string[]> = {
       basic: ['basic', 'scroll'],
       pagination: ['pagination-with-count', 'pagination-without-count'],
       sorting: ['sorting'],
+      persist: ['persist-fit', 'persist-scroll'],
     };
 
     const validSection = validCombinations[section] ? section : 'basic';
@@ -128,13 +169,8 @@ export default Vue.extend({
       : validCombinations[validSection][0];
 
     return {
-      activeSection: validSection as 'basic' | 'pagination' | 'sorting',
-      activePage: validPage as
-        | 'basic'
-        | 'scroll'
-        | 'pagination-with-count'
-        | 'pagination-without-count'
-        | 'sorting',
+      activeSection: validSection as Section,
+      activePage: validPage as Page,
     };
   },
   watch: {
@@ -146,15 +182,7 @@ export default Vue.extend({
     },
   },
   methods: {
-    setActivePage(
-      section: 'basic' | 'pagination' | 'sorting',
-      page:
-        | 'basic'
-        | 'scroll'
-        | 'pagination-with-count'
-        | 'pagination-without-count'
-        | 'sorting',
-    ) {
+    setActivePage(section: Section, page: Page) {
       this.activeSection = section;
       this.activePage = page;
     },

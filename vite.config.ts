@@ -44,7 +44,7 @@ export default defineConfig({
       },
     },
     cssCodeSplit: false,
-    // Исключаем playground из исходников для сборки
+    // Сборка только библиотеки; playground и local-test-playground не входят
     emptyOutDir: true,
   },
 });

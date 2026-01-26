@@ -1,13 +1,13 @@
 <template>
   <section class="section">
-    <h2>Базовая таблица</h2>
+    <h2>Сохранение состояния (fit)</h2>
     <p class="section__description">
-      Таблица растягивается на всю ширину родителя, ширина колонок
-      распределяется автоматически.
+      Режим <code>layout="fit"</code> с включённым сохранением в localStorage.
+      Скрывайте колонки, меняйте ширину — состояние восстановится после
+      перезагрузки.
     </p>
     <GridforgeTable
-      table-key="playground-basic"
-      :persist-state="false"
+      table-key="playground-persist-fit"
       :data="rows"
       :columns="columns"
       :action-column-params="actionColumnParams"
@@ -23,7 +23,7 @@ import { GridforgeTable } from '@/index';
 import type { TableColumn, TableRow, ActionColumnItem } from '@/types';
 
 export default Vue.extend({
-  name: 'BasicTableDemo',
+  name: 'PersistStateFitDemo',
   components: {
     GridforgeTable,
   },

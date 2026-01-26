@@ -112,9 +112,7 @@ export default Vue.extend({
       const params = this.actionColumnParams;
       if (!params || !params.length) return [];
       const row = this.cell.row.original as TableRow;
-      return params.filter((item) =>
-        item.visible ? item.visible(row) : true,
-      );
+      return params.filter((item) => (item.visible ? item.visible(row) : true));
     },
     isFrozenLeft(): boolean {
       return this.columnMeta.alignFrozen === 'left';

@@ -18,6 +18,25 @@ export type {
   ActionColumnItem,
 } from './types';
 
+// Storage service (localStorage state for columns, pagination, sort)
+export {
+  getTableState,
+  loadTableState,
+  saveTableState,
+  mergeAndPersist,
+  persistFromTable,
+  persistPagination,
+  persistSort,
+  resetToDefaultsAndPersist,
+} from './services/tableStateStorage';
+export type {
+  StoredTableState,
+  StoredColumnState,
+  StoredPagination,
+  CurrentColumnInput,
+  MergedTableState,
+} from './services/tableStateStorage';
+
 // Plugin installation for Vue 2
 export default {
   install(vue: typeof Vue) {

@@ -63,18 +63,21 @@ export function measureHeaderWidth(
 }
 
 /**
- * Обновляет автоматические минимальные размеры колонок на основе их заголовков
+ * Обновляет автоматические минимальные размеры колонок на основе их заголовков.
+ * Для колонок из skipWidthUpdateForColumnIds не перезаписываем ширину (сохранённые).
  */
 export function updateAutoMinSizes(
   table: GridforgeTableInstance,
   columns: TableColumn[],
   headerCells: NodeListOf<HTMLElement>,
+  skipWidthUpdateForColumnIds?: Set<string>,
 ): { hasChanges: boolean; columnSizing: Record<string, number> } {
   if (!table || headerCells.length === 0) {
     return { hasChanges: false, columnSizing: {} };
   }
 
   const allColumns = table.getAllLeafColumns();
+  const skipSet = skipWidthUpdateForColumnIds ?? new Set<string>();
   let hasChanges = false;
   const columnSizing = { ...table.getState().columnSizing };
 
@@ -85,7 +88,6 @@ export function updateAutoMinSizes(
     const columnId = column.id as string;
     if (columnId === ACTION_COLUMN_ID) return;
 
-    // Пропускаем колонки, у которых уже задан minWidth в props
     const originalColumn = columns.find(
       (col) => String(col.columnKey || col.field) === columnId,
     );
@@ -93,7 +95,6 @@ export function updateAutoMinSizes(
       return;
     }
 
-    // Измеряем ширину содержимого заголовка
     const content = cell.querySelector(
       '.gf-table__head-cell__content',
     ) as HTMLElement;
@@ -106,7 +107,6 @@ export function updateAutoMinSizes(
       column.getCanResize() || false,
     );
 
-    // Обновляем minSize в columnDef напрямую (влияет на getSize и ресайз)
     const def = column.columnDef as ColumnDef<TableRow, unknown>;
     const currentMinSize = def.minSize || 0;
     if (autoMinWidth > currentMinSize) {
@@ -114,7 +114,8 @@ export function updateAutoMinSizes(
       hasChanges = true;
     }
 
-    // Если текущий размер колонки меньше автоматического минимума, увеличиваем его
+    if (skipSet.has(columnId)) return;
+
     const currentSize = columnSizing[columnId] ?? column.getSize();
     if (currentSize < autoMinWidth) {
       columnSizing[columnId] = autoMinWidth;

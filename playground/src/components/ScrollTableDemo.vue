@@ -7,6 +7,8 @@
       <code>column.width</code>.
     </p>
     <GridforgeTable
+      table-key="playground-scroll"
+      :persist-state="false"
       :data="rows"
       :columns="columns"
       layout="scroll"

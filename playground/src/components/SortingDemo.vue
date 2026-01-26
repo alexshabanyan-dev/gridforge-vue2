@@ -7,6 +7,8 @@
       сортировать по нескольким колонкам одновременно.
     </p>
     <GridforgeTable
+      table-key="playground-sorting"
+      :persist-state="false"
       :data="rows"
       :columns="columns"
       :sort-by="sortBy"

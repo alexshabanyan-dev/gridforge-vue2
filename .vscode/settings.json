@@ -1,19 +1,28 @@
 {
-  // Vue 2 настройки
-  "vetur.experimental.templateInterpolationService": true,
+  // Отключаем Vetur полностью (плохо работает с Vue 2 + TypeScript)
+  "vetur.enable": false,
+  "vetur.useWorkspaceDependencies": false,
   "vetur.validation.template": false,
-  "vetur.validation.script": true,
-  "vetur.validation.style": true,
-  "vetur.useWorkspaceDependencies": true,
+  "vetur.validation.script": false,
+  "vetur.validation.style": false,
+  "vetur.experimental.templateInterpolationService": false,
   
-  // Volar (альтернатива Vetur для Vue 2)
-  "volar.takeOverMode.enabled": false,
+  // Volar для Vue 2.7+ (лучше работает с TypeScript)
+  "volar.takeOverMode.enabled": true,
   "volar.codeLens.pugTools": false,
   "volar.codeLens.scriptSetupTools": false,
   "volar.formatting.enable": false,
+  "volar.completion.preferredTagNameCase": "pascal",
+  "volar.autoCompleteRefs": true,
   
-  // Отключаем строгие проверки для Vue 2
+  // TypeScript настройки для Vue 2
   "typescript.strict": false,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.validate.enable": true,
+  "typescript.disableAutomaticTypeAcquisition": false,
+  
+  // Отключаем проверки типов в шаблонах Vue (Vetur все равно их не понимает)
+  "vue.server.hybridMode": false,
   
   // TypeScript настройки
   "typescript.tsdk": "node_modules/typescript/lib",

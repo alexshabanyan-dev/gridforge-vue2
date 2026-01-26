@@ -9,6 +9,42 @@
       :auto-hide="true"
       :handle-resize="true"
       :boundaries-selector="'.gf-table'"
+    >
+      <button
+        type="button"
+        class="gf-table__column-menu-trigger"
+        aria-label="Настройки"
+      >
+        <Icon
+          name="settings"
+          :size="12"
+          class="gf-table__column-menu-trigger-icon"
+        />
+      </button>
+      <template #popper>
+        <div class="gf-table__settings-menu-dropdown">
+          <button
+            type="button"
+            class="gf-table__settings-menu-item"
+            @click="onResetSettings"
+          >
+            {{
+              persistState
+                ? 'Сброс пользовательских настроек'
+                : 'Сброс (только для этой сессии)'
+            }}
+          </button>
+        </div>
+      </template>
+    </VDropdown>
+    <VDropdown
+      v-if="table"
+      :triggers="['click']"
+      :distance="8"
+      placement="bottom-end"
+      :auto-hide="true"
+      :handle-resize="true"
+      :boundaries-selector="'.gf-table'"
       @show="onMenuShow"
       @hide="onMenuHide"
     >
@@ -22,7 +58,6 @@
           class="gf-table__column-menu-trigger-icon"
         />
       </button>
-
       <template #popper>
         <div class="gf-table__column-menu-dropdown">
           <div class="gf-table__column-menu-header">
@@ -57,7 +92,7 @@
 import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { Column } from '@tanstack/table-core';
-import { Dropdown } from 'floating-vue';
+import { Dropdown, hideAllPoppers } from 'floating-vue';
 import 'floating-vue/dist/style.css';
 import { COLUMN_MENU_TITLE } from '../constants/tableConstants';
 import type { TableRow } from '../types';
@@ -79,6 +114,10 @@ export default Vue.extend({
       required: true,
       default: () => [],
     },
+    persistState: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -97,6 +136,10 @@ export default Vue.extend({
       const isChecked = target ? target.checked : column.getIsVisible();
       column.toggleVisibility(isChecked);
       this.$emit('visibility-change', column, isChecked);
+    },
+    onResetSettings() {
+      hideAllPoppers();
+      this.$emit('reset-settings');
     },
   },
 });

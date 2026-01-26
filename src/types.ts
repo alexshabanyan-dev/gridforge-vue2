@@ -102,8 +102,10 @@ export interface GridforgeTableProps<T = TableRow> {
   data: T[];
   /** Определения колонок */
   columns: TableColumn<T>[];
-  /** Уникальный ключ таблицы (для сохранения состояния) */
-  tableKey?: string;
+  /** Уникальный ключ таблицы (обязателен для сохранения состояния в localStorage) */
+  tableKey: string;
+  /** Включить сохранение состояния колонок в localStorage. По умолчанию true. */
+  persistState?: boolean;
   /** Класс для корневого элемента */
   customClass?: string;
   /** Размер страницы (по умолчанию 10) */

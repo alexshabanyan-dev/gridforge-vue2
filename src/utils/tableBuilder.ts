@@ -1,6 +1,6 @@
 import type { Updater } from '@tanstack/table-core';
 import type { TableColumn, TableRow, ActionColumnItem } from '../types';
-import type { GridforgeTableInstance } from '../tableCore';
+import type { GridforgeTableInstance, TableInitialState } from '../tableCore';
 import { createTanstackTable } from '../tableCore';
 import {
   createFitModeResizeHandler,
@@ -20,6 +20,7 @@ export function buildTable(
   onSizingUpdate: (sizing: Record<string, number>) => void,
   actionColumnParams?: ActionColumnItem[],
   actionColumnWidth?: number,
+  initialState?: TableInitialState,
 ): GridforgeTableInstance | null {
   const table = createTanstackTable(
     data || [],
@@ -27,6 +28,7 @@ export function buildTable(
     layout,
     actionColumnParams,
     actionColumnWidth,
+    initialState,
   );
   if (!table) return null;
 

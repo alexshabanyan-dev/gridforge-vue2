@@ -1,6 +1,7 @@
 /* eslint-env node */
 module.exports = {
   root: true,
+  ignorePatterns: ['local-test-playground/', 'playground/dist', 'dist'],
   extends: [
     'plugin:vue/essential',
     'eslint:recommended',
@@ -13,10 +14,7 @@ module.exports = {
   },
   rules: {
     'vue/multi-word-component-names': 'off',
-    'vue/max-attributes-per-line': [
-      'error',
-      { singleline: 1, multiline: 1 },
-    ],
+    'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: 1 }],
     '@typescript-eslint/no-explicit-any': 'error',
     'max-len': [
       'error',

@@ -13,14 +13,11 @@
       :action-column-params="actionColumnParams"
       @action="$emit('action', $event)"
     />
-    <tr v-if="!rows.length">
-      <td
-        :colspan="visibleColumnCount"
-        class="gf-table__body-cell"
-      >
-        <div class="gf-table__empty">{{ EMPTY_DATA_TEXT }}</div>
-      </td>
-    </tr>
+    <TableEmptyState
+      v-if="!rows.length"
+      :visible-column-count="visibleColumnCount"
+      :loading="loading"
+    />
   </tbody>
 </template>
 
@@ -29,13 +26,14 @@ import Vue from 'vue';
 import type { PropType } from 'vue';
 import type { ActionColumnItem } from '../types';
 import type { GridforgeTableInstance } from '../tableCore';
-import { EMPTY_DATA_TEXT } from '../constants/tableConstants';
 import TableBodyRow from './TableBodyRow.vue';
+import TableEmptyState from './TableEmptyState.vue';
 
 export default Vue.extend({
   name: 'TableBody',
   components: {
     TableBodyRow,
+    TableEmptyState,
   },
   props: {
     table: {
@@ -54,11 +52,10 @@ export default Vue.extend({
       type: Array as PropType<ActionColumnItem[]>,
       default: undefined,
     },
-  },
-  data() {
-    return {
-      EMPTY_DATA_TEXT,
-    };
+    loading: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     rows() {

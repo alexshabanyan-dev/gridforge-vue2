@@ -11,6 +11,7 @@ import type { TableRow, TableColumn, ActionColumnItem } from './types';
 import {
   ACTION_COLUMN_ID,
   ACTION_COLUMN_WIDTH,
+  DEFAULT_COLUMN_WIDTH,
 } from './constants/tableConstants';
 
 export type GridforgeTableInstance = Table<TableRow>;
@@ -71,12 +72,19 @@ function buildActionColumnDef(
   };
 }
 
+export interface TableInitialState {
+  columnVisibility?: Record<string, boolean>;
+  columnSizing?: Record<string, number>;
+  columnOrder?: string[];
+}
+
 export function createTanstackTable(
   data: TableRow[],
   columns: TableColumn[],
   layout: 'fit' | 'scroll',
   actionColumnParams?: ActionColumnItem[],
   actionColumnWidth?: number,
+  initialState?: TableInitialState,
 ): GridforgeTableInstance {
   const userDefs = toColumnDefs(columns || []);
   const hasAction = Boolean(
@@ -98,10 +106,8 @@ export function createTanstackTable(
     data: data || [],
     columns: cols,
     getCoreRowModel: getCoreRowModel(),
-    // Ресайз колонок: обновляем ширину в процессе движения
     columnResizeMode: 'onChange',
-    // Внутренне управляемое состояние: TanStack будет звать onStateChange,
-    // а мы просто обновляем table.options.state
+    initialState: initialState ?? {},
     state: {} as TableState,
     onStateChange: (updater: Updater<TableState>) => {
       const previous = table.getState();
@@ -112,13 +118,15 @@ export function createTanstackTable(
 
       (table as MutableTable<TableRow>).options.state = next;
     },
-    // Фоллбек для значений ячеек
     renderFallbackValue: null,
   });
 
-  // Инициализируем state рассчитанным initialState (со всеми слайсами
-  // columnSizing, columnSizingInfo, columnOrder и т.д.)
   (table as MutableTable<TableRow>).options.state = table.initialState;
 
   return table;
+}
+
+export function getDefaultWidth(col: TableColumn): number {
+  const w = col.width;
+  return typeof w === 'number' ? w : DEFAULT_COLUMN_WIDTH;
 }

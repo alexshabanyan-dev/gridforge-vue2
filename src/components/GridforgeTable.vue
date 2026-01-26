@@ -1,9 +1,17 @@
 <template>
-  <div :class="['gf-table', customClass]">
+  <div
+    :class="[
+      'gf-table',
+      customClass,
+      { 'gf-table--reset-flash': resetFlashActive },
+    ]"
+  >
     <TableBar
       :table="table"
       :columns="leafColumnsForMenu"
+      :persist-state="persistState"
       @visibility-change="onColumnVisibilityChange"
+      @reset-settings="onResetSettings"
     />
     <div class="gf-table__wrapper">
       <table :class="tableClass">
@@ -28,9 +36,21 @@
           :layout="layout"
           :visible-column-count="visibleColumnCount"
           :action-column-params="actionColumnParams"
+          :loading="loading"
           @action="onAction"
         />
       </table>
+      <div
+        v-if="loading"
+        class="gf-table__loading-overlay"
+      >
+        <Icon
+          name="loader"
+          :size="48"
+          color="var(--gf-color-primary)"
+          class="gf-table__loading-spinner"
+        />
+      </div>
     </div>
     <TableFooter
       v-if="showPagination"
@@ -65,11 +85,21 @@ import {
   handleDragOver,
   handleDrop,
 } from '../utils/columnReorder';
+import { getFullColumnSizing } from '../utils/columnResize';
+import {
+  mergeAndPersist,
+  persistFromTable,
+  persistPagination,
+  persistSort,
+  resetToDefaultsAndPersist,
+} from '../services/tableStateStorage';
+import { getDefaultWidth } from '../tableCore';
 import TableBar from './TableBar.vue';
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
 import TableFooter from './TableFooter.vue';
 import ColumnContextMenu from './ColumnContextMenu.vue';
+import Icon from './icons/Icon.vue';
 import type {
   PaginationWithTotal,
   PaginationWithFlags,
@@ -89,6 +119,7 @@ export default Vue.extend({
     TableBody,
     TableFooter,
     ColumnContextMenu,
+    Icon,
   },
   props: {
     data: {
@@ -103,7 +134,12 @@ export default Vue.extend({
     },
     tableKey: {
       type: String,
-      default: undefined,
+      required: true,
+    },
+    /** Включить сохранение состояния (видимость, ширина колонок) в localStorage. По умолчанию true. */
+    persistState: {
+      type: Boolean,
+      default: true,
     },
     customClass: {
       type: String,
@@ -141,6 +177,10 @@ export default Vue.extend({
       type: Number,
       default: undefined,
     },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -151,6 +191,9 @@ export default Vue.extend({
       contextMenuVisible: false,
       contextMenuHeader: null as Header<TableRow, unknown> | null,
       contextMenuPosition: null as { x: number; y: number } | null,
+      storedColumnIds: [] as string[],
+      persistDebounceTimer: null as ReturnType<typeof setTimeout> | null,
+      resetFlashActive: false,
     };
   },
   computed: {
@@ -283,32 +326,67 @@ export default Vue.extend({
   beforeDestroy() {
     document.removeEventListener('mouseup', this.handleResizeEnd);
     document.removeEventListener('touchend', this.handleResizeEnd);
+    if (this.persistDebounceTimer) {
+      clearTimeout(this.persistDebounceTimer);
+      this.persistDebounceTimer = null;
+    }
   },
   methods: {
     buildTable() {
-      // Очищаем старое значение action колонки из previousColumnSizing
-      // чтобы гарантировать применение нового размера
       if (ACTION_COLUMN_ID in this.previousColumnSizing) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [ACTION_COLUMN_ID]: _, ...rest } = this.previousColumnSizing;
         this.previousColumnSizing = rest;
       }
 
-      // Используем переупорядоченные колонки для построения таблицы
+      const ordered = this.orderedColumns || [];
+      const currentColumns: { id: string; defaultWidth: number }[] =
+        ordered.map((col) => ({
+          id: String(col.columnKey || col.field),
+          defaultWidth: getDefaultWidth(col),
+        }));
+      if (this.actionColumnParams && this.actionColumnParams.length > 0) {
+        const actionW = this.actionColumnWidth ?? ACTION_COLUMN_WIDTH;
+        currentColumns.push({
+          id: ACTION_COLUMN_ID,
+          defaultWidth: actionW,
+        });
+      }
+
+      let initialState:
+        | {
+            columnVisibility: Record<string, boolean>;
+            columnSizing: Record<string, number>;
+            columnOrder?: string[];
+          }
+        | undefined;
+      if (this.persistState) {
+        const merged = mergeAndPersist(this.tableKey, currentColumns);
+        this.storedColumnIds = merged.storedColumnIds;
+        initialState = {
+          columnVisibility: merged.columnVisibility,
+          columnSizing: merged.columnSizing,
+          columnOrder: merged.columnOrder,
+        };
+      } else {
+        this.storedColumnIds = [];
+      }
+
       this.table = buildTable(
         this.data || [],
-        this.orderedColumns || [],
+        ordered,
         this.layout as 'fit' | 'scroll',
         () => this.previousColumnSizing,
         (sizing) => {
           this.previousColumnSizing = sizing;
+          if (this.persistState) this.persistTableStateDebounced();
         },
         this.actionColumnParams,
         this.actionColumnWidth ?? ACTION_COLUMN_WIDTH,
+        initialState,
       );
 
       if (this.table) {
-        // Явно устанавливаем размер action колонки, если она есть
         if (this.actionColumnParams && this.actionColumnParams.length > 0) {
           const actionWidth = this.actionColumnWidth ?? ACTION_COLUMN_WIDTH;
           const currentSizing = this.table.getState().columnSizing;
@@ -317,9 +395,32 @@ export default Vue.extend({
             [ACTION_COLUMN_ID]: actionWidth,
           });
         }
-        // Инициализируем previousColumnSizing текущими размерами колонок
         this.previousColumnSizing = initializeColumnSizing(this.table);
       }
+    },
+    persistTableState() {
+      if (!this.persistState || !this.table) return;
+      if (this.persistDebounceTimer) {
+        clearTimeout(this.persistDebounceTimer);
+        this.persistDebounceTimer = null;
+      }
+      const ids = this.table.getAllLeafColumns().map((c) => c.id as string);
+      const visibility = this.table.getState().columnVisibility ?? {};
+      const sizing = getFullColumnSizing(this.table);
+      const order = this.table.getState().columnOrder;
+      const columnOrder =
+        Array.isArray(order) && order.length > 0 ? order : undefined;
+      persistFromTable(this.tableKey, visibility, sizing, ids, columnOrder);
+    },
+    persistTableStateDebounced() {
+      if (!this.persistState || !this.table) return;
+      if (this.persistDebounceTimer) {
+        clearTimeout(this.persistDebounceTimer);
+      }
+      this.persistDebounceTimer = setTimeout(() => {
+        this.persistDebounceTimer = null;
+        this.persistTableState();
+      }, 400);
     },
     updateAutoMinSizes() {
       if (!this.table) return;
@@ -328,10 +429,12 @@ export default Vue.extend({
         '.gf-table__head-cell',
       ) as NodeListOf<HTMLElement>;
 
+      const skipSet = new Set(this.storedColumnIds);
       const { hasChanges, columnSizing } = updateAutoMinSizes(
         this.table,
         this.orderedColumns,
         headerCells,
+        skipSet,
       );
 
       // Применяем обновлённые размеры, если что-то изменилось
@@ -343,11 +446,60 @@ export default Vue.extend({
     },
     onColumnVisibilityChange() {
       if (!this.table) return;
-      // TanStack сам обновляет state.columnVisibility через features,
-      // но мы форсируем перерисовку Vue для надёжности
+      this.$nextTick(() => {
+        if (this.persistState) this.persistTableState();
+        this.$forceUpdate();
+      });
+    },
+    onResetSettings() {
+      if (!this.table) return;
+      const ordered = this.orderedColumns || [];
+      const currentColumns: { id: string; defaultWidth: number }[] =
+        ordered.map((col) => ({
+          id: String(col.columnKey || col.field),
+          defaultWidth: getDefaultWidth(col),
+        }));
+      if (this.actionColumnParams && this.actionColumnParams.length > 0) {
+        const actionW = this.actionColumnWidth ?? ACTION_COLUMN_WIDTH;
+        currentColumns.push({
+          id: ACTION_COLUMN_ID,
+          defaultWidth: actionW,
+        });
+      }
+      const defaultOrder = currentColumns.map((c) => c.id);
+      if (!this.persistState) {
+        const visibility: Record<string, boolean> = {};
+        const sizing: Record<string, number> = {};
+        currentColumns.forEach((c) => {
+          visibility[c.id] = true;
+          sizing[c.id] = c.defaultWidth;
+        });
+        this.table.setColumnVisibility(visibility);
+        this.table.setColumnSizing(sizing);
+        this.table.setColumnOrder(defaultOrder);
+        this.previousColumnSizing = { ...sizing };
+        this.storedColumnIds = [];
+      } else {
+        const defaultPageSize = this.currentPageSize ?? this.pageSize ?? 10;
+        const merged = resetToDefaultsAndPersist(
+          this.tableKey,
+          currentColumns,
+          defaultPageSize,
+        );
+        this.table.setColumnVisibility(merged.columnVisibility);
+        this.table.setColumnSizing(merged.columnSizing);
+        this.table.setColumnOrder(merged.columnOrder ?? defaultOrder);
+        this.previousColumnSizing = { ...merged.columnSizing };
+        this.storedColumnIds = [];
+      }
+      this.resetFlashActive = true;
       this.$nextTick(() => {
         this.$forceUpdate();
       });
+      this.$emit('reset');
+      setTimeout(() => {
+        this.resetFlashActive = false;
+      }, 300);
     },
     onResizeStart(
       header: Header<TableRow, unknown>,
@@ -379,7 +531,7 @@ export default Vue.extend({
 
       const success = handleDrop(this.table, header, this.draggedColumnId);
       if (success) {
-        // Форсируем перерисовку, чтобы заголовки/ячейки перешли в новый порядок
+        if (this.persistState) this.persistTableState();
         this.$nextTick(() => {
           this.$forceUpdate();
         });
@@ -403,12 +555,10 @@ export default Vue.extend({
       }
     },
     handleResizeEnd() {
-      // Синхронизируем previousColumnSizing с текущим состоянием после окончания ресайза
       if (this.table) {
         this.previousColumnSizing = { ...this.table.getState().columnSizing };
+        if (this.persistState) this.persistTableState();
       }
-      // Форсируем обновление компонента после окончания ресайза,
-      // чтобы убрать класс --resizing
       this.$nextTick(() => {
         this.$forceUpdate();
       });
@@ -512,11 +662,28 @@ export default Vue.extend({
       this.$emit('columns-change', reorderedColumns);
     },
     onPageSizeChange(newSize: number) {
-      // Эмитим событие, но не меняем локально - ждем обновления пропса
+      if (this.persistState) {
+        persistPagination(this.tableKey, {
+          pageSize: newSize,
+          currentPage: 0,
+        });
+      }
       this.$emit('page-size-change', newSize);
     },
     onPageChange(page: number | 'previous' | 'next') {
-      // Эмитим событие для изменения страницы
+      if (this.persistState && this.pagination) {
+        const cur = this.pagination.currentPage ?? 0;
+        const next =
+          typeof page === 'number'
+            ? page
+            : page === 'previous'
+              ? cur - 1
+              : cur + 1;
+        persistPagination(this.tableKey, {
+          pageSize: this.pagination.pageSize,
+          currentPage: Math.max(0, next),
+        });
+      }
       this.$emit('page-change', page);
     },
     onSortToggle(columnId: string) {
@@ -543,7 +710,7 @@ export default Vue.extend({
         }
       }
 
-      // Эмитим событие, но не меняем локально - ждем обновления пропса
+      if (this.persistState) persistSort(this.tableKey, nextSort);
       this.$emit('sort-change', nextSort);
     },
   },

@@ -7,6 +7,8 @@
       страницами с отображением номеров страниц.
     </p>
     <GridforgeTable
+      table-key="playground-pagination"
+      :persist-state="false"
       :data="paginatedRows"
       :columns="columns"
       :page-size="pageSize"

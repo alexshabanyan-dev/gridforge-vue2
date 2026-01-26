@@ -24,7 +24,6 @@ export default defineConfig({
     port: 3000,
     open: true,
     fs: {
-      // Разрешаем доступ к родительской директории для поиска node_modules
       allow: ['..'],
     },
   },

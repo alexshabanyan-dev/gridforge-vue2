@@ -31,3 +31,6 @@ dist-ssr
 
 # NPM
 .npmrc
+
+# Local test playground (Machinery): token, API config — не коммитить
+local-test-playground/

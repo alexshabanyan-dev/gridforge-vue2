@@ -6,6 +6,8 @@
       Используются флаги isFirst и isLast для навигации.
     </p>
     <GridforgeTable
+      table-key="playground-pagination-no-count"
+      :persist-state="false"
       :data="paginatedRows"
       :columns="columns"
       :page-size="pageSize"

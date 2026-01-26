@@ -19,6 +19,9 @@ const NAME_TO_ICON: Record<string, string> = {
   sortAsc: 'lucide:arrow-up',
   sortDesc: 'lucide:arrow-down',
   ellipsisVertical: 'lucide:ellipsis-vertical',
+  settings: 'lucide:settings',
+  inbox: 'lucide:inbox',
+  loader: 'lucide:loader-2',
 };
 
 export default Vue.extend({
